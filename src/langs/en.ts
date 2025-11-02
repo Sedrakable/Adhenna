@@ -10,6 +10,8 @@ export const enTranslations: Translations = {
     info: "Information",
     experience: "Live the Experience",
     cart: "Cart",
+    policies: "Policies",
+    services: "Services",
   },
   buttons: {
     view: "View",
@@ -75,8 +77,9 @@ export const enTranslations: Translations = {
     cart: "Cart",
     privacy: "Privacy Policy",
     terms: "Terms and Conditions",
-
+    policies: "Policies",
     other: "Other",
+    madeBy: "Site made by Seto x Arts",
   },
   hours: {
     title: "Opening Hours",
@@ -91,6 +94,8 @@ export const enTranslations: Translations = {
   },
   other: {
     reserve: "Reserve",
+    notAvailable: "Not Available",
+    repeatable: "Repeatable",
   },
   cart: {
     itemsAddedToCart: "items have been added to cart",
@@ -98,6 +103,9 @@ export const enTranslations: Translations = {
     checkCartAlert: "Check Cart",
     total: "Total",
     noItemsInCart: "No items in cart. Please check Boutique",
+    subtotal: "Subtotal",
+    taxes: "Taxes",
+    shipping: "Shipping",
   },
   select: {
     sort: "Sort",
@@ -123,9 +131,17 @@ export const enTranslations: Translations = {
       black: "Black + Grey",
       brown: "Brown",
     },
-    tattooStatus: "Status",
-    tattooStatusOptions: {
+    articleType: "Article Type",
+    articleTypeOptions: {
+      henna: "Henna",
+      jagua: "Jagua",
+      toile: "Canvas",
+      tattoo: "Tattoo",
+    },
+    tattooOther: "Other",
+    tattooOtherOptions: {
       healed: "Healed",
+      "cover-up": "Cover-up",
     },
     flashStyles: "Style",
     flashStylesOptions: {

@@ -16,8 +16,8 @@ export interface WorkPageProps {
   work: IWork;
 }
 
-export const getWorkPageData = async (slug: string) => {
-  const workQuery = workPageQuery(slug);
+export const getWorkPageData = async (slug: string, locale: LangType) => {
+  const workQuery = workPageQuery(slug, locale);
 
   const workData: WorkPageProps = await fetchPageData(workQuery);
 
@@ -30,7 +30,7 @@ export async function generateMetadata({
   params: Promise<{ locale: LangType; projectType: string }>;
 }): Promise<Metadata> {
   const { locale, projectType } = await params; // Await the params
-  const portfolioPageData = await getWorkPageData(projectType);
+  const portfolioPageData = await getWorkPageData(projectType, locale);
   const { metaTitle, metaDesc, metaKeywords } = portfolioPageData.meta;
   const path = `${LocalPaths.PORTFOLIO}/${projectType}`;
   const crawl = true;
@@ -50,8 +50,11 @@ export default async function WorkPage({
 }: {
   params: Promise<{ locale: LangType; projectType: string }>;
 }) {
-  const { projectType } = await params; // Await the params
-  const workPageData: WorkPageProps = await getWorkPageData(projectType);
+  const { locale, projectType } = await params; // Await the params
+  const workPageData: WorkPageProps = await getWorkPageData(
+    projectType,
+    locale
+  );
 
   return (
     workPageData && (

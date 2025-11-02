@@ -32,7 +32,7 @@ export const LangSwitcher: React.FC<{ onClick?: () => void }> = ({
   return (
     <FlexDiv className={styles.langWrapper} onClick={langClick}>
       <Paragraph level="big" color="burgundy">
-        {locale?.toUpperCase()}
+        {locale === "en" ? "FR" : "EN"}
       </Paragraph>
     </FlexDiv>
   );

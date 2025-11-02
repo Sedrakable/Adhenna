@@ -27,6 +27,11 @@ const getSocialsData = async () => {
   return socialsPageData;
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default async function LocaleLayout({
   children,
   params,
@@ -41,17 +46,12 @@ export default async function LocaleLayout({
 
   const { locale } = await params; // Await the params
 
-  // If locale is not "fr", trigger Next.js' built-in 404
-  if (locale !== "fr") {
-    redirect(`/fr/404`);
-  }
-
   return (
     locale && (
       <html lang={locale}>
         <NextIntlClientProvider locale={locale}>
           <head>
-            <meta name="theme-color" content="#fec301" />
+            <meta name="theme-color" content="#853d57" />
             <meta name="enviroment" content={process.env.NODE_ENV} />
           </head>
           <body className={inter.className}>
@@ -63,7 +63,7 @@ export default async function LocaleLayout({
               </div>
             </div>
           </body>
-          {/* <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ID!} /> */}
+          {/* <GoogleAnalytics gaId={process.env.GOOGLE_ID!} /> */}
         </NextIntlClientProvider>
       </html>
     )
