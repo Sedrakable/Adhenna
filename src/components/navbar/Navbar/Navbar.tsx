@@ -19,6 +19,7 @@ import { LangType } from "@/i18n/request";
 import dynamic from "next/dynamic";
 import { Socials } from "@/components/footer/Socials";
 import { useGoogleEvent } from "@/app/api/sendGoogleEvent";
+import { LangSwitcher } from "../LangSwitcher/LangSwitcher";
 
 const Sidebar = dynamic(
   () => import("../Sidebar/Sidebar").then((module) => module.Sidebar),
@@ -151,7 +152,7 @@ export const Navbar: FC<NavbarProps> = ({ socials }) => {
                 {translations.nav.contact}
               </Button>
 
-              {/* {!isMobile && <LangSwitcher />} */}
+              {!isMobile && <LangSwitcher />}
               {!isMobileOrTablet && <Socials {...socials} />}
             </FlexDiv>
 
