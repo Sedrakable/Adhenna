@@ -1,6 +1,6 @@
 import styles from "./LangSwitcher.module.scss";
 import { useLocale } from "next-intl";
-import { useRouter, usePathname } from "@/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { useTransition } from "react";
 import { useParams } from "next/navigation";
 import FlexDiv from "@/components/reuse/FlexDiv";
@@ -39,7 +39,7 @@ export const LangSwitcher: React.FC<{ onClick?: () => void }> = ({
         weight={400}
         className={styles.langText}
       >
-        {locale === "en" ? "EN" : "FR"}
+        {locale === "en" ? "FR" : "EN"}
       </Heading>
       {/* <Paragraph level="big" color="burgundy">
         {locale === "en" ? "FR" : "EN"}

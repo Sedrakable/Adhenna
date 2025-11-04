@@ -212,7 +212,7 @@ export const cartPageQuery = (locale: LangType): string =>
   );
 
 export const formQuery = (slug: string, locale: LangType): string =>
-  pageQuery(`${slug}Form`, locale, ``);
+  pageQuery(`${slug}Form`, locale, `...`);
 
 export const boutiquePageQuery = (locale: LangType): string =>
   pageQuery(
@@ -303,4 +303,4 @@ export const policiesPageQuery = (locale: LangType): string =>
   );
 
 export const notFoundPageQuery = (locale: LangType): string =>
-  pageQuery("notFoundPage", locale, ``);
+  pageQuery("notFoundPage", locale, `...`);

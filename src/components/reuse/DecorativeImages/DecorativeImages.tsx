@@ -3,10 +3,10 @@ import React, { useMemo } from "react";
 import Image, { StaticImageData } from "next/image";
 import cn from "classnames";
 import styles from "./DecorativeImages.module.scss";
-import scull from "/public/photos/Scull.jpeg";
-import ananas from "/public/photos/Ananas.jpeg";
-import girl from "/public/photos/Girl.jpeg";
-import pattern from "/public/photos/Pattern.jpeg";
+import scull from "../../../../public/photos/Scull.jpeg";
+import ananas from "../../../../public/photos/Ananas.jpeg";
+import girl from "../../../../public/photos/Girl.jpeg";
+import pattern from "../../../../public/photos/Pattern.jpeg";
 
 interface DecorativeImageProps {
   position: "left" | "right";
@@ -111,13 +111,13 @@ export const DecorativeImages: React.FC<{ positions: ImagePositions }> = ({
     <>
       {positions.left && (
         <DecorativeImage
-          src={leftImage}
+          src={leftImage.src}
           position="left"
           topOffset={positions.left}
         />
       )}
       <DecorativeImage
-        src={rightImage}
+        src={rightImage.src}
         position="right"
         topOffset={positions.right}
       />

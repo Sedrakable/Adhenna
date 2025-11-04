@@ -14,7 +14,7 @@ import { useLocale } from "next-intl";
 import { LangType } from "@/i18n/request";
 import { Heading } from "../Heading";
 import { FancyText } from "../FancyText/FancyText";
-import fishes from "/public/photos/Fishes.jpeg";
+import fishes from "../../../../public/photos/Fishes.jpeg";
 import { AnimatedWrapper } from "../AnimatedWrapper/AnimatedWrapper";
 import { useParallaxScroll } from "@/helpers/useParallaxScroll";
 import { useGoogleEvent } from "@/app/api/sendGoogleEvent";

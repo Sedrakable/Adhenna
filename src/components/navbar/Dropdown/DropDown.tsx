@@ -7,7 +7,7 @@ import { Paragraph } from "../../reuse/Paragraph/Paragraph";
 import { useAtom } from "jotai";
 import { sidebarData } from "../Sidebar/Sidebar";
 import Link from "next/link";
-import { usePathname } from "@/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 
 export interface DropDownProps {
