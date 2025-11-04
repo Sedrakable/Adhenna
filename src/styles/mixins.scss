@@ -68,3 +68,33 @@ $desktop: 1680px;
     @include sizing($desk);
   }
 }
+
+@mixin vari(
+  $property,
+  $mobile,
+  $tablet-val,
+  $laptop-val: $tablet-val,
+  $desktop-val: $laptop-val
+) {
+  & {
+    #{$property}: #{$mobile}; // Mobile (base value, applies below $tablet)
+  }
+
+  @media (min-width: #{$tablet}) {
+    & {
+      #{$property}: #{$tablet-val}; // Tablet size
+    }
+  }
+
+  @media (min-width: #{$laptop}) {
+    & {
+      #{$property}: #{$laptop-val}; // Laptop size
+    }
+  }
+
+  @media (min-width: #{$desktop}) {
+    & {
+      #{$property}: #{$desktop-val}; // Desktop size
+    }
+  }
+}

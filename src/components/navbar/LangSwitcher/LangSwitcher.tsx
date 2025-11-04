@@ -5,6 +5,7 @@ import { useTransition } from "react";
 import { useParams } from "next/navigation";
 import FlexDiv from "@/components/reuse/FlexDiv";
 import { Paragraph } from "@/components/reuse/Paragraph/Paragraph";
+import { Heading } from "@/components/reuse/Heading";
 
 export const LangSwitcher: React.FC<{ onClick?: () => void }> = ({
   onClick,
@@ -31,9 +32,18 @@ export const LangSwitcher: React.FC<{ onClick?: () => void }> = ({
 
   return (
     <FlexDiv className={styles.langWrapper} onClick={langClick}>
-      <Paragraph level="big" color="burgundy">
+      <Heading
+        level="5"
+        color="burgundy"
+        as="h4"
+        weight={400}
+        className={styles.langText}
+      >
+        {locale === "en" ? "EN" : "FR"}
+      </Heading>
+      {/* <Paragraph level="big" color="burgundy">
         {locale === "en" ? "FR" : "EN"}
-      </Paragraph>
+      </Paragraph> */}
     </FlexDiv>
   );
 };

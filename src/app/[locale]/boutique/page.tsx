@@ -24,9 +24,10 @@ export interface BoutiquePageProps {
 }
 
 export const getBoutiquePageData = async (locale: LangType) => {
-  const homeQuery = boutiquePageQuery(locale);
+  const query = boutiquePageQuery(locale);
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const boutiquePageData: BoutiquePageProps = await fetchPageData(homeQuery);
+  const boutiquePageData: BoutiquePageProps = await fetchPageData(query);
+  console.log("Boutique Page Data:", boutiquePageData);
   return boutiquePageData;
 };
 

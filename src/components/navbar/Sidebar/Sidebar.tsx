@@ -13,6 +13,8 @@ import { LangType } from "@/i18n/request";
 import { useLocale } from "next-intl";
 import { Socials } from "@/components/footer/Socials";
 import { useGoogleEvent } from "@/app/api/sendGoogleEvent";
+import { LangSwitcher } from "../LangSwitcher/LangSwitcher";
+import { useWindowResize } from "@/helpers/useWindowResize";
 
 export const sidebarData = atom<boolean>(false);
 
@@ -22,6 +24,7 @@ interface SidebarProps {
   socials: ISocials;
 }
 export const Sidebar: React.FC<SidebarProps> = ({ links, lang, socials }) => {
+  const { isMobile } = useWindowResize();
   const [sidebar, setSidebar] = useAtom(sidebarData);
   const locale = useLocale() as LangType;
   const translations = getTranslations(locale);
@@ -104,6 +107,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ links, lang, socials }) => {
               width100
               padding={{ vertical: [3] }}
             >
+              {isMobile && <LangSwitcher onClick={() => setSidebar(false)} />}
               <Button
                 variant="extra"
                 path={`/${locale}${LocalPaths.CART}`}
@@ -127,7 +131,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ links, lang, socials }) => {
               width100
               padding={{ vertical: [3] }}
             >
-              {/* <LangSwitcher onClick={() => setSidebar(false)} /> */}
               <Socials {...socials} />
             </FlexDiv>
           )}

@@ -15,10 +15,7 @@ const pageQuery = (
   locale: LangType,
   fields: string
 ): string => `
-coalesce(
-  *[_type == "${pageType}" && lang == '${locale}'][0],
-  *[_type == "${pageType}" && lang == 'fr'][0]
-){${fields}}
+*[_type == "${pageType}" && lang == '${locale}'][0]{${fields}}
 `;
 
 // ============================================
