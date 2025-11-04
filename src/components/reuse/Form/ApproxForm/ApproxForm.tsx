@@ -109,7 +109,7 @@ export const ApproxForm: FC<
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ formData, locale, plan }),
+        body: JSON.stringify({ formData, plan, locale }),
       });
 
       if (response.ok) {

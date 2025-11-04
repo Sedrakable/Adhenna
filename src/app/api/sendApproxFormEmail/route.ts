@@ -1,177 +1,147 @@
-import {
-  ApproxFormData,
-  EncodedFileType,
-} from "@/components/reuse/Form/formTypes";
+import { ApproxFormData } from "@/components/reuse/Form/formTypes";
 import { LangType } from "@/i18n/request";
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
-import routeStyles from "../routeStyle";
+import {
+  createEmailTransporter,
+  prepareAttachments,
+  createEmailTemplate,
+} from "../emailUtils";
+import { translations } from "../emailTranslations";
 
-// Prepare images as attachments and link them via CID
-const prepareAttachments = (attachments: EncodedFileType[]) => {
-  return attachments.map((attach) => ({
-    filename: attach.name,
-    content: Buffer.from(attach.data, "base64"),
-    contentType: attach.type, // Use the file name as the CID for each image
-  }));
-};
-
-// Email translations
-const emailTranslations = (plan: string) => ({
-  fr: {
-    subject: `🌸${plan} Approximatif - Adhenna🌸`,
-    title: `Votre ${plan} chez Adhenna!`,
-    greeting: (name: string) => `Cher/Chère ${name},`,
-    thankYouMessage: () =>
-      `Merci d’avoir contacté Adhenna Tattoo! Vous recevrez bientôt un courriel avec une soumission pour votre ${plan}. Surveillez votre boîte de réception (et vos pourriels, au besoin). 😊`,
-    dimensions: "Dimensions demandées:",
-    additionalInfo: "Informations supplémentaires:",
-    regards: "Cordialement,",
-    team: "Alexia - Adhenna Tattoo",
-  },
-});
-
-// Generate client email template based on locale
-const generateClientEmailTemplate = (
+/**
+ * Generate client email content for approx form
+ */
+const generateClientEmailContent = (
   formData: ApproxFormData,
-  locale: LangType,
-  plan: string
+  plan: string,
+  locale: LangType
 ): string => {
-  const t = emailTranslations(plan)[locale];
+  const t = translations.approx[locale];
 
   return `
-    <!DOCTYPE html>
-    <html lang="${locale}">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${t.title}</title>
-      <style>
-      ${routeStyles}
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>${t.title}</h1>
-        
-        <div class="details-section">
-          <p>${t.greeting(formData.firstName)}</p>
-          <p>${t.thankYouMessage()}</p>
-        </div>
-        
-        <div class="details-section">
-          
-          <div class="detail-item">
-            <span class="detail-label">${t.dimensions}</span>
-            <p>${formData.width}" x ${formData.length}"</p>
-          </div>
-          
-          
-          ${
-            formData.info
-              ? `
-          <div class="detail-item">
-            <span class="detail-label">${t.additionalInfo}</span>
-            <p>${formData.info}</p>
-          </div>
-          `
-              : ""
-          }
-          
-           
-        </div>
-        <span class="detail-label">${t.regards}<br>${t.team}</span>
+    <h1>${t.title(plan)}</h1>
+    
+    <div class="details-section">
+      <p>${t.greeting(formData.firstName)}</p>
+      <p>${t.thankYouMessage(plan)}</p>
+    </div>
+    
+    <div class="details-section">
+      <div class="detail-item">
+        <span class="detail-label">${t.dimensions}</span>
+        <p>${formData.width}" x ${formData.length}"</p>
       </div>
-    </body>
-    </html>
+      
+      ${
+        formData.info
+          ? `
+      <div class="detail-item">
+        <span class="detail-label">${t.additionalInfo}</span>
+        <p>${formData.info}</p>
+      </div>
+      `
+          : ""
+      }
+    </div>
+    
+    <div class="signature">
+      ${t.regards}<br>${t.team}
+    </div>
   `;
 };
 
+/**
+ * Generate business email content for approx form
+ */
+const generateBusinessEmailContent = (
+  formData: ApproxFormData,
+  plan: string,
+  locale: LangType
+): string => {
+  const t = translations.business.approx;
+
+  return `
+    <h1>${t.title}</h1>
+    
+    <div class="details-section">
+      <h2>${t.customerInfo}</h2>
+      <p>
+        <strong>${t.name}</strong> ${formData.firstName} ${
+    formData.lastName
+  }<br>
+        <strong>${t.email}</strong> ${formData.email}<br>
+        <strong>${t.language}</strong> ${locale.toUpperCase()}<br>
+      </p>
+    </div>
+
+    <div class="details-section">
+      <h2>${t.serviceDetails}</h2>
+      <p>
+        <strong>${t.service}</strong> ${plan}<br>
+        <strong>${t.dimensions}</strong> ${formData.width}" x ${
+    formData.length
+  }"<br>
+      </p>
+      
+      ${
+        formData.info
+          ? `
+      <h2>${t.additionalInfo}</h2>
+      <p>${formData.info}</p>
+      `
+          : ""
+      }
+    </div>
+  `;
+};
+
+/**
+ * POST handler for approx form email
+ */
 export async function POST(request: Request) {
   try {
     const {
       formData,
-      locale,
       plan,
+      locale,
     }: {
       formData: ApproxFormData;
-      locale: LangType;
       plan: string;
+      locale: LangType;
     } = await request.json();
 
-    const attachments = prepareAttachments(formData.uploads); // Prepare attachments
+    // Validate locale
+    if (!["en", "fr"].includes(locale)) {
+      return NextResponse.json(
+        { error: "Invalid locale. Must be 'en' or 'fr'" },
+        { status: 400 }
+      );
+    }
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_BUSINESS,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    const attachments = prepareAttachments(formData.uploads);
+    const transporter = createEmailTransporter();
+    const t = translations.approx[locale as LangType];
+    const tBusiness = translations.business.approx;
 
-    // Generate client email template
-    const clientEmailTemplate = generateClientEmailTemplate(
-      formData,
-      locale,
-      plan
+    // Generate email templates
+    const clientEmailHtml = createEmailTemplate(
+      locale as LangType,
+      t.title(plan),
+      generateClientEmailContent(formData, plan, locale as LangType)
     );
 
-    // Business email template
-    const businessEmailTemplate = `
-   <!DOCTYPE html>
-   <html lang="en">
-   <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>New Consultation Request</title>
-      <style>
-        ${routeStyles}
-      </style>
-   </head>
-   <body>
-     <div class="container">
-       <h1>New Consultation Request</h1>
-       
-       <div class="details-section">
-         <h2>Customer Information:</h2>
-         <p>
-           Name: ${formData.firstName} ${formData.lastName}<br>
-           Email: ${formData.email}<br>
-           Language: ${locale.toUpperCase()}<br>
-         </p>
-       </div>
+    const businessEmailHtml = createEmailTemplate(
+      "fr",
+      tBusiness.title,
+      generateBusinessEmailContent(formData, plan, locale as LangType)
+    );
 
-       <div class="details-section">
-         <h2>Service Details:</h2>
-         <p>
-           Service: ${plan}<br>
-           Dimensions: ${formData.width}" x ${formData.length}"<br>
-         </p>
-         
-         ${
-           formData.info
-             ? `
-         <h2>Additional Information:</h2>
-         <p>${formData.info}</p>
-         `
-             : ""
-         }
-         
-        
-       </div>
-     </div>
-   </body>
-   </html>
- `;
-
-    console.log("sending email");
+    // Send email to client
     await transporter.sendMail({
       from: `"Adhenna Tattoo" <${process.env.EMAIL_BUSINESS}>`,
       to: formData.email,
-      subject: emailTranslations(plan)[locale].subject,
-      html: clientEmailTemplate,
+      subject: t.subject(plan),
+      html: clientEmailHtml,
       attachments,
     });
 
@@ -179,18 +149,29 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from: `"Adhenna ${plan} Approximatif" <${process.env.EMAIL_BUSINESS}>`,
       to: process.env.EMAIL_BUSINESS,
-      subject: `🌸${plan} Approximatif - ${formData.firstName} ${
-        formData.lastName
-      } (${locale.toUpperCase()})🌸`,
-      html: businessEmailTemplate,
+      subject: tBusiness.subject(
+        plan,
+        formData.firstName,
+        formData.lastName,
+        locale
+      ),
+      html: businessEmailHtml,
       attachments,
     });
 
-    return NextResponse.json({ message: "Emails sent successfully" });
+    return NextResponse.json({
+      message: "Emails sent successfully",
+      success: true,
+    });
   } catch (error) {
-    console.error("Server error:", error);
+    console.error("Error sending approx form emails:", error);
+
     return NextResponse.json(
-      { error: "Failed to send emails", details: error.message },
+      {
+        error: "Failed to send emails",
+        details: error instanceof Error ? error.message : "Unknown error",
+        success: false,
+      },
       { status: 500 }
     );
   }

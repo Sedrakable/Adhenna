@@ -1,8 +1,9 @@
+//src/app/api/sendCartFormEmail/route.ts
 import { AddressFormData } from "@/components/reuse/Form/formTypes";
 import { ICartProduct } from "@/data.d";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import routeStyles from "../routeStyle";
+import routeStyles from "../emailStyles";
 
 // Email translations
 const emailTranslations = {
