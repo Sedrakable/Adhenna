@@ -13,7 +13,7 @@ import {
   FormSubmitMessage,
 } from "@/components/reuse/Form/Form";
 import { LangType } from "@/i18n/request";
-import { motion, useAnimationControls } from "framer-motion";
+import { motion, useAnimationControls, Variants } from "motion/react";
 import { getTranslations } from "@/helpers/langUtils";
 
 export interface ApproxProps {
@@ -30,7 +30,7 @@ export const Approx: FC<ApproxProps> = ({ form, images, plan, locale }) => {
   const controls = useAnimationControls();
 
   // Animation variants for FormSubmitMessage
-  const variants = {
+  const variants: Variants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
       opacity: 1,

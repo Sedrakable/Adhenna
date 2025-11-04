@@ -1,5 +1,5 @@
 "use client";
-import React, { CSSProperties } from "react";
+import React, { CSSProperties, ReactElement } from "react";
 import styles from "./Heading.module.scss";
 import cn from "classnames";
 import {
@@ -42,7 +42,7 @@ type HeadingAsType = typeof HeadingAsArray[number];
 export type TextWeightType = 300 | 400 | 500;
 
 export interface HeadingProps {
-  children: string | JSX.Element;
+  children: string | ReactElement;
   level: HeadingLevelType;
   as: HeadingAsType;
   weight?: TextWeightType;
@@ -71,7 +71,7 @@ export const Heading: React.FC<HeadingProps> = ({
 }) => {
   const { spacingNum } = useSpacingGenerator(paddingBottomArray);
 
-  const CustomHeading = as as keyof JSX.IntrinsicElements;
+  const CustomHeading = as as keyof React.JSX.IntrinsicElements;
 
   const finalString =
     typeof children === "string" && upperCase

@@ -33,7 +33,7 @@ export const LangSwitcher: React.FC<{ onClick?: () => void }> = ({
   return (
     <FlexDiv className={styles.langWrapper} onClick={langClick}>
       <Heading
-        level="5"
+        level="6"
         color="burgundy"
         as="h4"
         weight={400}

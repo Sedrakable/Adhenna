@@ -14,7 +14,12 @@ import {
 } from "@/components/reuse/Form/FloatingImageWrapper/FloatingImageWrapper";
 import { FormSubmitMessage } from "@/components/reuse/Form/Form";
 import { LangType } from "@/i18n/request";
-import { motion, useAnimationControls } from "framer-motion";
+import {
+  HTMLMotionProps,
+  motion,
+  useAnimationControls,
+  Variants,
+} from "motion/react";
 
 export interface ContactProps {
   form: ContactFormProps;
@@ -29,7 +34,7 @@ export const Contact: FC<ContactProps> = ({ form, images, locale }) => {
   const controls = useAnimationControls(); // Animation controls
 
   // Animation variants for FormSubmitMessage
-  const variants = {
+  const variants: Variants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
       opacity: 1,

@@ -1,5 +1,5 @@
 "use client";
-import { Fragment } from "react";
+import { Fragment, ReactElement } from "react";
 import styles from "./ContentBlock.module.scss";
 import cn from "classnames";
 
@@ -188,7 +188,7 @@ export const contentBlocks = ({
 }: {
   blocks: (IBlock | ISanityImageBlock)[];
 }) => {
-  const result: JSX.Element[] = [];
+  const result: ReactElement[] = [];
   let currentListItems: IBlock[] = [];
   let currentListType: "number" | "bullet" | null = null; // Track the current type of list (numbered or bullet)
   let currentLevel = 1; // Track the current level of the list
