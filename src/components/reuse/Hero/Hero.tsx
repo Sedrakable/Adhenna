@@ -47,7 +47,7 @@ export const Hero: React.FC<HeroProps> = ({
   const locale = useLocale() as LangType;
   const sendEvent = useGoogleEvent();
 
-  const heroRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null!);
   const scrollProgress = useParallaxScroll(heroRef);
 
   const vertical =

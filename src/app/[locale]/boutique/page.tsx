@@ -27,7 +27,6 @@ export const getBoutiquePageData = async (locale: LangType) => {
   const query = boutiquePageQuery(locale);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const boutiquePageData: BoutiquePageProps = await fetchPageData(query);
-  console.log("Boutique Page Data:", boutiquePageData);
   return boutiquePageData;
 };
 
@@ -38,7 +37,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params; // Await the params
   const boutiquePageData: BoutiquePageProps = await getBoutiquePageData(locale);
-  const { metaTitle, metaDesc, metaKeywords } = boutiquePageData?.meta || {};
+  const { metaTitle, metaDesc } = boutiquePageData?.meta || {};
   const path = LocalPaths.BOUTIQUE;
   const crawl = true;
 
@@ -46,7 +45,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });

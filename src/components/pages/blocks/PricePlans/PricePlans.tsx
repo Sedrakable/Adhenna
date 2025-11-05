@@ -180,12 +180,11 @@ export const PricePlan: FC<PricePlanProps> = ({
 
 export interface PricePlansProps {
   data: PricePlanProps[];
-  version?: 1 | 2;
+
   customTitle?: string;
 }
 export const PricePlans: React.FC<PricePlansProps> = ({
   data,
-  version = 1,
   customTitle,
 }) => {
   const locale = useLocale() as LangType;
@@ -197,7 +196,7 @@ export const PricePlans: React.FC<PricePlansProps> = ({
       <FlexDiv
         gapArray={[6, 4, 5, 6]}
         width100
-        className={cn(styles.wrapper, styles[`version${version}`])}
+        className={cn(styles.wrapper)}
         wrap
       >
         {data.map((pricePlan) => {

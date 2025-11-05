@@ -134,21 +134,22 @@
     }
     .text {
       position: relative;
-      .title {
-        font-size: var(--heading-h6) !important;
-        line-height: var(--heading-h6-line) !important;
-      }
+      // .title {
+      //   font-size: var(--heading-h6) !important;
+      //   line-height: var(--heading-h6-line) !important;
+      // }
       .line {
         position: absolute;
         width: calc(100% + 20px);
         height: 12px;
-        bottom: 10px;
+        bottom: 4px;
         path {
           fill: var(--burgundy);
         }
       }
       p {
         width: auto !important;
+        text-transform: uppercase !important;
       }
       .infini {
         height: 1em;

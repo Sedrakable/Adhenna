@@ -55,7 +55,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const contactPageData = await getContactPageData(locale);
-  const { metaTitle, metaDesc, metaKeywords } = contactPageData.meta;
+  const { metaTitle, metaDesc } = contactPageData.meta;
   const path = LocalPaths.CONTACT;
   const crawl = true;
 
@@ -63,7 +63,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });

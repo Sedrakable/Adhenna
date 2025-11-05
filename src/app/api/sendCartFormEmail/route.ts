@@ -1,108 +1,91 @@
-//src/app/api/sendCartFormEmail/route.ts
 import { AddressFormData } from "@/components/reuse/Form/formTypes";
 import { ICartProduct } from "@/data.d";
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
-import routeStyles from "../emailStyles";
+import {
+  createEmailTransporter,
+  createEmailTemplate,
+  formatCurrency,
+} from "../emailUtils";
+import { LangType } from "@/i18n/request";
+import { translations } from "../emailTranslations";
 
-// Email translations
-const emailTranslations = {
-  en: {
-    subject: "🌸Thank You for Your Order! - Order Confirmation🌸",
-    title: "Thank You for Your Order!",
-    greeting: (name: string) => `Dear ${name},`,
-    thankYouMessage: () =>
-      `Thank you for purchasing from Adhenna! I am excited to confirm that I've received your order and am processing it now. I'll make sure everything is perfect for you.`,
-    orderDetails: "Order Details:",
-    shippingInfo: "Shipping Information:",
-    deliveryMethod: "Delivery Method:",
-    yourMessage: "Your Message:",
-    trackingInfo:
-      "We'll send you another email with tracking information once your package is on its way.",
-    regards: "Best regards,",
-    team: "Alexia - Adhenna Tattoo",
-  },
-  fr: {
-    subject: "🌸Merci pour votre commande ! - Confirmation de commande🌸",
-    title: "Merci pour votre commande !",
-    greeting: (name: string) => `Cher/Chère ${name},`,
-    thankYouMessage: () =>
-      `Merci d’avoir précommandé les produits Adhenna Tattoo! Vous recevrez bientôt un courriel avec les détails pour le paiement et la date de livraison. `,
-    orderDetails: "Détails de la commande :",
-    shippingInfo: "Informations de livraison :",
-    deliveryMethod: "Méthode de livraison :",
-    yourMessage: "Votre message :",
-    trackingInfo:
-      "Surveillez votre boîte de réception (et vos pourriels, au besoin).",
-    regards: "Cordialement,",
-    team: "Alexia - Adhenna Tattoo",
-  },
-};
-
-// Helper function to format currency
-const formatCurrency = (num: number) => Math.round(num * 100) / 100;
-
-// Helper function to calculate order total
-const calculateTotal = (cart: ICartProduct[]): number => {
-  const cartTotal = cart.reduce(
+/**
+ * Calculate order totals
+ */
+const calculateOrderTotals = (cart: ICartProduct[], deliveryPrice: number) => {
+  const subtotal = cart.reduce(
     (total, item) => total + item.quantity * parseFloat(item.product.price),
     0
   );
-  return cartTotal;
+  const taxes = (subtotal + deliveryPrice) * 0.15; // 15% tax rate
+  const grandTotal = subtotal + deliveryPrice + taxes;
+
+  return { subtotal, taxes, grandTotal };
 };
 
-// Generate the product table HTML
+/**
+ * Generate product table HTML
+ */
 const generateProductTable = (
   cart: ICartProduct[],
-  deliveryPrice: number
+  deliveryPrice: number,
+  locale: LangType
 ): string => {
-  const subTotal = calculateTotal(cart);
-  const taxes = (subTotal + deliveryPrice) * 0.15; // Example tax rate, adjust as needed
-  const grandTotal = subTotal + deliveryPrice + taxes;
+  const { subtotal, taxes, grandTotal } = calculateOrderTotals(
+    cart,
+    deliveryPrice
+  );
+  const t = translations.cart[locale];
 
   return `
     <table>
-      <tr>
-        <th>Product</th>
-        <th>Quantity</th>
-        <th>Price</th>
-        <th>Total</th>
-      </tr>
-      ${cart
-        .map(
-          (item) => `
+      <thead>
         <tr>
-          <td>${item.product.type} - ${item.product.title}</td>
-          <td>${item.quantity}</td>
-          <td>${formatCurrency(parseFloat(item.product.price))}</td>
-          <td>${formatCurrency(
-            item.quantity * parseFloat(item.product.price)
-          )}</td>
+          <th>${t.product}</th>
+          <th>${t.quantity}</th>
+          <th>${t.price}</th>
+          <th>${t.total}</th>
         </tr>
-      `
-        )
-        .join("")}
+      </thead>
+      <tbody>
+        ${cart
+          .map(
+            (item) => `
+          <tr>
+            <td>${item.product.type} - ${item.product.title}</td>
+            <td>${item.quantity}</td>
+            <td>${formatCurrency(parseFloat(item.product.price))} $</td>
+            <td>${formatCurrency(
+              item.quantity * parseFloat(item.product.price)
+            )} $</td>
+          </tr>
+        `
+          )
+          .join("")}
+        <tr>
+          <td colspan="3"><strong>${t.subtotal}</strong></td>
+          <td><strong>${formatCurrency(subtotal)} $</strong></td>
+        </tr>
+        <tr>
+          <td colspan="3">${t.delivery}</td>
+          <td>${formatCurrency(deliveryPrice)} $</td>
+        </tr>
+        <tr>
+          <td colspan="3">${t.taxes}</td>
+          <td>${formatCurrency(taxes)} $</td>
+        </tr>
         <tr class="total">
-          <td colspan="3">Sous-total</td>
-          <td>${formatCurrency(subTotal)} </td>
+          <td colspan="3"><strong>${t.grandTotal}</strong></td>
+          <td><strong>${formatCurrency(grandTotal)} $</strong></td>
         </tr>
-        <tr>
-          <td colspan="3">Delivery</td>
-          <td>${formatCurrency(deliveryPrice)}</td>
-        </tr>
-        <tr>
-          <td colspan="3">Taxes</td>
-          <td>${formatCurrency(taxes)}</td>
-        </tr>
-      <tr class="total">
-        <td colspan="3">Total</td>
-        <td>${formatCurrency(grandTotal)}</td>
-      </tr>
+      </tbody>
     </table>
   `;
 };
 
-// Generate shipping information HTML
+/**
+ * Generate shipping information HTML
+ */
 const generateShippingInfo = (formData: AddressFormData): string => {
   return `
     ${formData.firstName} ${formData.lastName}<br>
@@ -113,161 +96,186 @@ const generateShippingInfo = (formData: AddressFormData): string => {
   `;
 };
 
-// Generate client email template based on locale
-const generateClientEmailTemplate = (
+/**
+ * Generate client email content
+ */
+const generateClientEmailContent = (
   formData: AddressFormData,
   cart: ICartProduct[],
   deliveryPrice: number,
-  locale: "en" | "fr"
+  locale: LangType
 ): string => {
-  const t = emailTranslations[locale];
+  const t = translations.cart[locale];
 
   return `
-    <!DOCTYPE html>
-    <html lang="${locale}">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${t.title}</title>
-      <style>
-      ${routeStyles}
-      </style>
+    <h1>${t.title}</h1>
+    
+    <div class="details-section">
+      <p>${t.greeting(formData.firstName)}</p>
+      <p>${t.thankYouMessage}</p>
+    </div>
+    
+    <div class="details-section">  
+      <h2>${t.orderDetails}</h2>
+      ${generateProductTable(cart, deliveryPrice, locale)}
+      
+      <h2>${t.shippingInfo}</h2>
+      <p>${generateShippingInfo(formData)}</p>
+      
+      <h2>${t.deliveryMethod}</h2>
+      <p>${formData.delivery}</p>
 
-    </head>
-    <body>
-      <div class="container">
-        <h1>${t.title}</h1>
-        
-        <div class="thank-you">
-          <p>${t.greeting(formData.firstName)}</p>
-          <p>${t.thankYouMessage()}</p>
-        </div>
-        
-        <div class="details-section">  
-          <h2>${t.orderDetails}</h2>
-          ${generateProductTable(cart, deliveryPrice)}
-          
-          <h2>${t.shippingInfo}</h2>
-          <p>${generateShippingInfo(formData)}</p>
-          
-          <h2>${t.deliveryMethod}</h2>
-          <p>${formData.delivery}</p>
-
-          ${
-            formData.message
-              ? `<h2>${t.yourMessage}</h2>
-                <p>${formData.message}</p>`
-              : ""
-          }
-          <p>${t.trackingInfo}</p>
-        </div>        
-        <span class="detail-label">${t.regards}<br>${t.team}</span>
-      </div>
-    </body>
-    </html>
+      ${
+        formData.message
+          ? `
+      <h2>${t.yourMessage}</h2>
+      <p>${formData.message}</p>
+      `
+          : ""
+      }
+      
+      <p><em>${t.trackingInfo}</em></p>
+    </div>
+    
+    <div class="signature">
+      ${t.regards}<br>${t.team}
+    </div>
   `;
 };
+
+/**
+ * Generate business email content
+ */
+const generateBusinessEmailContent = (
+  formData: AddressFormData,
+  cart: ICartProduct[],
+  deliveryPrice: number,
+  locale: LangType
+): string => {
+  const t = translations.business.cart;
+
+  return `
+    <h1>${t.title}</h1>
+    
+    <div class="details-section">
+      <h2>${t.customerInfo}</h2>
+      <p>
+        <strong>Nom:</strong> ${formData.firstName} ${formData.lastName}<br>
+        <strong>Courriel:</strong> ${formData.email}<br>
+        <strong>Langue:</strong> ${locale.toUpperCase()}<br>
+      </p>
+    </div>
+    
+    <div class="details-section">
+      <h2>${t.orderSummary}</h2>
+      ${generateProductTable(cart, deliveryPrice, locale)}
+      
+      <h2>${t.shippingAddress}</h2>
+      <p>${generateShippingInfo(formData)}</p>
+      
+      <h2>${t.deliveryMethod}</h2>
+      <p>${formData.delivery}</p>
+
+      ${
+        formData.message
+          ? `
+      <h2>${t.customerMessage}</h2>
+      <p>${formData.message}</p>
+      `
+          : ""
+      }
+    </div>
+  `;
+};
+
+/**
+ * POST handler for cart form email
+ */
 interface RequestData {
   formData: AddressFormData;
   cart: ICartProduct[];
   deliveryPrice: number;
   locale: "en" | "fr";
 }
+
 export async function POST(request: Request) {
   try {
     const {
       formData,
       cart,
       deliveryPrice = 0,
-      locale = "en",
+      locale = "fr",
     }: RequestData = await request.json();
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_BUSINESS,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    // Validate locale
+    if (!["en", "fr"].includes(locale)) {
+      return NextResponse.json(
+        { error: "Invalid locale. Must be 'en' or 'fr'" },
+        { status: 400 }
+      );
+    }
 
-    // Generate client email template based on locale
-    const clientEmailTemplate = generateClientEmailTemplate(
-      formData,
-      cart,
-      deliveryPrice,
-      locale
+    // Validate cart
+    if (!cart || cart.length === 0) {
+      return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+    }
+
+    const transporter = createEmailTransporter();
+    const t = translations.cart[locale as LangType];
+    const tBusiness = translations.business.cart;
+
+    // Generate email templates
+    const clientEmailHtml = createEmailTemplate(
+      locale as LangType,
+      t.title,
+      generateClientEmailContent(
+        formData,
+        cart,
+        deliveryPrice,
+        locale as LangType
+      )
     );
 
-    // Business Email Template (remains in English)
-    const businessEmailTemplate = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>New Order Received</title>
-        <style>
-        ${routeStyles}
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>New Order Received</h1>
-          
-          <div class="order-info">
-            <h2>Customer Information:</h2>
-            <p>
-              Name: ${formData.firstName} ${formData.lastName}<br>
-              Email: ${formData.email}<br>
-              Language: ${locale.toUpperCase()}<br>
-            </p>
-          </div>
-          
-          <h2>Order Summary:</h2>
-          ${generateProductTable(cart, deliveryPrice)}
-          
-          <h2>Shipping Address:</h2>
-          <p>${generateShippingInfo(formData)}</p>
-          
-          <h2>Delivery Method:</h2>
-          <p>${formData.delivery}</p>
-
-          ${
-            formData.message
-              ? `<h2>Customer Message:</h2>
-                 <p>${formData.message}</p>`
-              : ""
-          }
-        </div>
-      </body>
-      </html>
-    `;
+    const businessEmailHtml = createEmailTemplate(
+      "fr",
+      tBusiness.title,
+      generateBusinessEmailContent(
+        formData,
+        cart,
+        deliveryPrice,
+        locale as LangType
+      )
+    );
 
     // Send email to client
     await transporter.sendMail({
       from: `"Adhenna Order" <${process.env.EMAIL_BUSINESS}>`,
       to: formData.email,
-      subject: emailTranslations[locale].subject,
-      html: clientEmailTemplate,
+      subject: t.subject,
+      html: clientEmailHtml,
     });
 
     // Send email to business
     await transporter.sendMail({
       from: `"Adhenna Cart Order" <${process.env.EMAIL_BUSINESS}>`,
       to: process.env.EMAIL_BUSINESS,
-      subject: `🌸New Order - ${formData.firstName} ${
-        formData.lastName
-      } (${locale.toUpperCase()})🌸`,
-      html: businessEmailTemplate,
+      subject: tBusiness.subject(formData.firstName, formData.lastName, locale),
+      html: businessEmailHtml,
     });
 
-    return NextResponse.json({ message: "Emails sent successfully" });
+    return NextResponse.json({
+      message: "Emails sent successfully",
+      success: true,
+    });
   } catch (error) {
-    console.error("Server error:", error);
+    console.error("Error sending cart form emails:", error);
+
     return NextResponse.json(
-      { error: "Failed to send emails", details: error.message },
+      {
+        error: "Failed to send emails",
+        details: error instanceof Error ? error.message : "Unknown error",
+        success: false,
+      },
       { status: 500 }
     );
   }

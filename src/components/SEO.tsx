@@ -13,14 +13,12 @@ export const setMetadata = ({
   locale,
   metaTitle,
   metaDesc,
-  metaKeywords,
   path,
   crawl,
 }: SEOProps): Metadata => {
   const metadata: Metadata = {
     title: metaTitle,
     description: metaDesc,
-    keywords: metaKeywords,
     robots: {
       index: crawl,
       follow: crawl,

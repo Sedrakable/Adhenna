@@ -27,7 +27,7 @@ import { DisplayProps } from "@/components/reuse/Display/Display";
 export interface OnlineCoursePageProps extends VideoAndPriceProps {
   meta: ISeo;
   hero: IHero;
-  desc: unknown;
+  desc: any;
   features: DisplayProps[];
 }
 
@@ -37,6 +37,7 @@ export const getOnlineCoursePageData = async (locale: LangType) => {
   const onlineCoursePageData: OnlineCoursePageProps = await fetchPageData(
     onlineCourseQuery
   );
+  console.log("Online Course Page Data:", onlineCoursePageData);
   return onlineCoursePageData;
 };
 
@@ -49,8 +50,7 @@ export async function generateMetadata({
   const onlineCoursePageData: OnlineCoursePageProps = await getOnlineCoursePageData(
     locale
   );
-  const { metaTitle, metaDesc, metaKeywords } =
-    onlineCoursePageData?.meta || {};
+  const { metaTitle, metaDesc } = onlineCoursePageData?.meta || {};
   const path = LocalPaths.COURSE + LocalPaths.ONLINE;
   const crawl = true;
 
@@ -58,7 +58,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });
@@ -80,7 +79,7 @@ export default async function OnlineCoursePage({
         )}
 
         <Block variant="default" illustrations>
-          {onlineCoursePageData.desc && (
+          {onlineCoursePageData?.desc && (
             <TextWrapper version={3}>
               <PortableTextContent
                 value={onlineCoursePageData.desc}

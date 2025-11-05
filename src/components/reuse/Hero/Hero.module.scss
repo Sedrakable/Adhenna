@@ -48,7 +48,7 @@
     --bg-img-width-3: calc(100% * 1 / 2);
     --main-color: none;
     --hero-height-1: 800px;
-    --hero-height-2: 600px;
+    --hero-height-2: 580px;
     --hero-1-desc-column-span: 4;
     // --hero-height-3: 320px;
     --title-line-height: var(--heading-h1-line);
@@ -65,7 +65,7 @@
 
   @media (min-width: $desktop) {
     --hero-height-1: 1100px;
-    --hero-height-2: 720px;
+    --hero-height-2: 540px;
     // --hero-height-3: 400px;
     --subtitle1-column-span: 4;
     --hero-2-desc-column-span: 3;
@@ -358,7 +358,7 @@
 
   .content {
     height: var(--hero-height-2);
-    min-height: 125vw;
+    min-height: 135vw;
     .image {
       width: var(--profile-image-width-2) !important;
       background: var(--cream-white);
@@ -436,12 +436,16 @@
     }
   }
   @media (min-width: $laptop) {
-    .subTitle {
-      width: calc(var(--subtitle1-column-span) / 7 * 100%);
-    }
-    .textWrapper {
-      .desc {
-        width: calc(var(--hero-2-desc-column-span) / 7 * 100%);
+    min-height: fit-content;
+    .content {
+      height: auto;
+      .subTitle {
+        width: calc(var(--subtitle1-column-span) / 7 * 100%);
+      }
+      .textWrapper {
+        .desc {
+          width: calc(var(--hero-2-desc-column-span) / 7 * 100%);
+        }
       }
     }
   }

@@ -31,7 +31,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, projectType } = await params; // Await the params
   const portfolioPageData = await getWorkPageData(projectType, locale);
-  const { metaTitle, metaDesc, metaKeywords } = portfolioPageData.meta;
+  const { metaTitle, metaDesc } = portfolioPageData.meta;
   const path = `${LocalPaths.PORTFOLIO}/${projectType}`;
   const crawl = true;
 
@@ -39,7 +39,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });

@@ -27,7 +27,6 @@ export async function generateMetadata({
     locale,
     metaTitle: productPageData.title,
     metaDesc: productPageData.desc!,
-    metaKeywords: [],
     path,
     crawl,
   });

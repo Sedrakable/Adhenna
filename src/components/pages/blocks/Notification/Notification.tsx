@@ -6,7 +6,7 @@ import { FC } from "react";
 
 export interface NotificationProps {
   title: string;
-  desc: unknown;
+  desc: any;
 }
 export const Notification: FC<NotificationProps> = ({ title, desc }) => {
   return (

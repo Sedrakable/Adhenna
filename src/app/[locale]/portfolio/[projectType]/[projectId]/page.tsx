@@ -33,7 +33,6 @@ export async function generateMetadata({
     locale,
     metaTitle: projectData.image.alt,
     metaDesc: projectData.image.alt,
-    metaKeywords: [],
     path,
     crawl,
   });
@@ -45,7 +44,6 @@ export default async function ProjectPage({
   params: Promise<{ projectId: string; projectType: string; locale: LangType }>;
 }) {
   const { projectId, projectType, locale } = await params;
-  const workPageData: WorkPageProps = await getWorkPageData(projectType);
   const formData: FormTitleProps = await getFormData(
     projectType as ProjectType,
     locale
@@ -65,7 +63,6 @@ export default async function ProjectPage({
       }
     >
       {projectType === "flash" ? (
-        workPageData &&
         formData && (
           <FlashModal project={selectedProject as IFlash} formData={formData} />
         )

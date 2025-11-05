@@ -29,7 +29,7 @@ export async function generateMetadata({
     locale,
     slug
   );
-  const { metaTitle, metaDesc, metaKeywords } = articlePageData.meta;
+  const { metaTitle, metaDesc } = articlePageData.meta;
   const path = `${LocalPaths.BLOG}/${slug}`;
   const crawl = true;
 
@@ -37,7 +37,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });

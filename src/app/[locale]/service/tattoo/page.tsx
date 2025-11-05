@@ -63,8 +63,7 @@ export async function generateMetadata({
   const tattooServicePageData: TattooServicePageProps = await getTattooServicePageData(
     locale
   );
-  const { metaTitle, metaDesc, metaKeywords } =
-    tattooServicePageData?.meta || {};
+  const { metaTitle, metaDesc } = tattooServicePageData?.meta || {};
   const path = LocalPaths.SERVICE + LocalPaths.TATTOO;
   const crawl = true;
 
@@ -72,7 +71,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });

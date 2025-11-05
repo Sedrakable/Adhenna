@@ -43,7 +43,7 @@ export const Block: React.FC<BlockProps> = ({
     null
   );
   const contentRef = useRef<HTMLDivElement>(null);
-  const blockRef = useRef<HTMLDivElement>(null);
+  const blockRef = useRef<HTMLDivElement>(null!);
   const [cssLoaded, setCssLoaded] = useState(false);
   const scrollProgress = useParallaxScroll(blockRef);
 
@@ -116,7 +116,7 @@ export const Block: React.FC<BlockProps> = ({
       className={cn(styles.block, styles[variant], className)}
       padding={{
         horizontal: variant === "full-width" ? [0] : [6, 8, 11, 12],
-        top: variant === "full-width" ? [10, 10, 10, 11] : [7, 7, 8, 9],
+        top: variant === "full-width" ? [7, 9, 10, 11] : [7, 7, 8, 9],
         bottom: [0],
       }}
       width100

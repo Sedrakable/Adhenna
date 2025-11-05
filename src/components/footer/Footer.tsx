@@ -150,7 +150,7 @@ const SiteMap: FC<{ locale: LangType }> = ({ locale }) => {
 };
 
 const Legal: FC<{ locale: LangType }> = ({ locale }) => {
-  const trans = getTranslations(locale);
+  const trans: Translations = getTranslations(locale);
   return (
     <FlexDiv
       className={styles.legalLinks}
