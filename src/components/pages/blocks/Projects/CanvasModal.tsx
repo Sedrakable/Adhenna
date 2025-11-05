@@ -45,7 +45,7 @@ export const CanvasModal: FC<CanvasModalProps> = ({ project }) => {
       flex={{ direction: "column" }}
       width100
       className={styles.toilesModalContainer}
-      padding={{ top: [5, 6, 2, 0] }}
+      padding={{ top: [5, 3, 2, 0] }}
     >
       <FlexDiv
         flex={{ x: "space-between", y: "center" }}

@@ -17,7 +17,6 @@ export interface PortfolioPageProps {
   meta: ISeo;
   hero: IHero;
   works: WorkPageProps[];
-  history: HistoryProps;
 }
 
 const getPortfolioPageData = async (locale: LangType) => {
@@ -35,7 +34,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params; // Await the params
   const portfolioPageData = await getPortfolioPageData(locale);
-  const { metaTitle, metaDesc, metaKeywords } = portfolioPageData.meta;
+  const { metaTitle, metaDesc } = portfolioPageData.meta;
   const path = LocalPaths.PORTFOLIO;
   const crawl = true;
 
@@ -43,7 +42,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });
@@ -68,9 +66,6 @@ export default async function PortfolioPage({
         <Block variant="default" illustrations>
           {portfolioPageData?.works && (
             <Works worksData={portfolioPageData?.works} title={false} />
-          )}
-          {portfolioPageData?.history && (
-            <History {...portfolioPageData.history} />
           )}
         </Block>
         {carouselData && <Carousel data={carouselData} />}

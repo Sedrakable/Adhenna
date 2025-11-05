@@ -23,6 +23,7 @@ import { ProjectFilters } from "../../../reuse/Form/CustomFilters/ProjectFilters
 import { useProjectFilters } from "../../../reuse/Form/CustomFilters/useProjectFilters";
 
 import Link from "next/link";
+import { Paragraph } from "@/components/reuse/Paragraph/Paragraph";
 
 interface ProjectProps {
   project: IProject;
@@ -36,36 +37,15 @@ export const Project: FC<ProjectProps> = ({ project, type }) => {
       const flashProject = project as IFlash;
       return (
         <>
-          <Heading
-            as="h3"
-            level="5"
+          <Paragraph
+            level="regular"
             color="dark-burgundy"
-            weight={300}
+            weight={400}
             textAlign="center"
             className={styles.title}
           >
             {flashProject.title}
-          </Heading>
-          {/* <Paragraph
-            level="big"
-            color="burgundy"
-            weight={400}
-            textAlign="center"
-          >
-            {`\u00A0x\u00A0`}
           </Paragraph>
-          {flashProject.repeatable ? (
-            <Infini className={styles.infini} />
-          ) : (
-            <Paragraph
-              level="big"
-              color="burgundy"
-              weight={400}
-              textAlign="center"
-            >
-              1
-            </Paragraph>
-          )} */}
           {flashProject.reserved && <Line className={styles.line} />}
         </>
       );
@@ -73,29 +53,27 @@ export const Project: FC<ProjectProps> = ({ project, type }) => {
       const toilesProject = project as ICanvas;
       return (
         <>
-          <Heading
-            as="h2"
-            level="5"
+          <Paragraph
+            level="regular"
             color="dark-burgundy"
-            weight={300}
+            weight={400}
             textAlign="center"
             className={styles.title}
           >
             {toilesProject.title}
-          </Heading>
+          </Paragraph>
           {toilesProject.reserved ? (
             <Line className={styles.line} />
           ) : (
-            <Heading
-              as="h3"
-              level="6"
+            <Paragraph
+              level="regular"
               color="burgundy"
               weight={400}
               textAlign="center"
               className={styles.price}
             >
               {`\u00A0• $${toilesProject.price}`}
-            </Heading>
+            </Paragraph>
           )}
         </>
       );
@@ -107,7 +85,7 @@ export const Project: FC<ProjectProps> = ({ project, type }) => {
       flex={{ direction: "column", y: "flex-start" }}
       height100
       width100
-      gapArray={[3, 4, 4, 5]}
+      gapArray={[2, 3, 3, 4]}
     >
       <SanityImage
         image={project?.image.image}

@@ -8,22 +8,17 @@ interface SEOProps extends ISeo {
   path: string;
   crawl?: boolean;
 }
-// Dynamic import for the BreadcrumbJsonLd component
-const DynamicBreadcrumbJsonLd = dynamic(() =>
-  import("next-seo").then((mod) => mod.BreadcrumbJsonLd)
-);
+
 export const setMetadata = ({
   locale,
   metaTitle,
   metaDesc,
-  metaKeywords,
   path,
   crawl,
 }: SEOProps): Metadata => {
   const metadata: Metadata = {
     title: metaTitle,
     description: metaDesc,
-    keywords: metaKeywords,
     robots: {
       index: crawl,
       follow: crawl,
@@ -59,10 +54,11 @@ export const setMetadata = ({
       ],
     },
     alternates: {
-      canonical: `https://www.adhennatatoo.com/${locale}${path}`,
+      canonical: `https://www.adhennatattoo.com/${locale}${path}`,
       languages: {
-        en: `https://www.adhennatatoo.com/en${path}`,
-        fr: `https://www.adhennatatoo.com/fr${path}`,
+        en: `https://www.adhennatattoo.com/en${path}`,
+        fr: `https://www.adhennatattoo.com/fr${path}`,
+        "x-default": `https://www.adhennatattoo.com/fr${path}`,
       },
     },
   };

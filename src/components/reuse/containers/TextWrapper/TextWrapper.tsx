@@ -33,8 +33,8 @@ export const TextWrapper: FC<TextWrapperProps> = ({
     <FlexDiv
       width100
       padding={{
-        vertical: variant === "big" ? [6, 6, 6, 7] : [4, 4, 4, 5],
-        horizontal: variant === "big" ? [4, 7, 7, 8] : [4, 6, 6, 7],
+        vertical: variant === "big" ? [6, 6, 6, 7] : [4, 5, 5, 6],
+        horizontal: variant === "big" ? [4, 7, 7, 8] : [5, 7, 7, 8],
       }}
       flex={{ direction }}
       className={cn(styles.wrapper, styles[`version${version}`])}

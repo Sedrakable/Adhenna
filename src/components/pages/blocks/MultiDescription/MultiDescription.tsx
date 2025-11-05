@@ -13,7 +13,7 @@ import { PortableTextContent } from "@/components/reuse/Paragraph/PortableTextCo
 
 export interface DescriptionProps {
   title: string;
-  desc: unknown;
+  desc: any;
   textAlign?: CSSProperties["textAlign"];
   cta?: ICta;
 }
@@ -25,7 +25,7 @@ export const Description: React.FC<DescriptionProps> = ({
 }) => {
   const locale = useLocale() as LangType;
   return (
-    <FlexDiv flex={{ direction: "column" }} gapArray={[3, 3, 3, 4]} width100>
+    <FlexDiv flex={{ direction: "column" }} gapArray={[2, 2, 2, 3]} width100>
       <Heading
         as="h5"
         level="5"
@@ -66,7 +66,7 @@ export const MultiDescription: React.FC<MultiDescriptionProps> = ({
   return (
     <TextWrapper>
       <FlexDiv
-        gapArray={[7, 7, 7, 8]}
+        gapArray={[6, 6, 6, 7]}
         flex={{
           direction:
             isMobile || (desktopVertical && isDesktop) ? "column" : "row",

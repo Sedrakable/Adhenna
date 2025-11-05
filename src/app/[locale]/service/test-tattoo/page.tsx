@@ -32,7 +32,7 @@ export interface TestTattooServicePageProps {
   meta: ISeo;
   hero: IHero;
   display: DisplayProps;
-  desc: unknown;
+  desc: any;
   pricePlans: PricePlanProps[];
   bigCTA: BigCTAProps;
 }
@@ -55,8 +55,7 @@ export async function generateMetadata({
   const testTattooServicePageData: TestTattooServicePageProps = await getTestTattooServicePageData(
     locale
   );
-  const { metaTitle, metaDesc, metaKeywords } =
-    testTattooServicePageData?.meta || {};
+  const { metaTitle, metaDesc } = testTattooServicePageData?.meta || {};
   const path = LocalPaths.SERVICE + LocalPaths.TEST_TATTOO;
   const crawl = true;
 
@@ -64,7 +63,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });

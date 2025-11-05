@@ -33,7 +33,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params; // Await the params
   const cartPageData = await getCartPageData(locale);
-  const { metaTitle, metaDesc, metaKeywords } = cartPageData.meta;
+  const { metaTitle, metaDesc } = cartPageData.meta;
   const path = LocalPaths.CART;
   const crawl = false;
 
@@ -41,7 +41,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });

@@ -1,103 +1,112 @@
-import {
-  ContactFormData,
-  EncodedFileType,
-} from "@/components/reuse/Form/formTypes";
+import { ContactFormData } from "@/components/reuse/Form/formTypes";
 import { LangType } from "@/i18n/request";
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
-import routeStyles from "../routeStyle";
+import {
+  createEmailTransporter,
+  prepareAttachments,
+  createEmailTemplate,
+} from "../emailUtils";
+import { translations } from "../emailTranslations";
 
-// Prepare images as attachments and link them via CID
-const prepareAttachments = (attachments: EncodedFileType[]) => {
-  return attachments.map((attach) => ({
-    filename: attach.name,
-    content: Buffer.from(attach.data, "base64"),
-    contentType: attach.type, // Use the file name as the CID for each image
-  }));
-};
-
-// Email translations
-const emailTranslations = {
-  fr: {
-    subject: "🌸Confirmation de rendez-vous🌸",
-    title: "Votre rendez-vous chez Adhenna!",
-    greeting: (name: string) => `Cher/Chère ${name},`,
-    thankYouMessage: () =>
-      `Merci d’avoir contacté Adhenna Tattoo pour votre prochain projet de henné ou de tatouage permanent ! Nous vous enverrons bientôt un courriel pour fixer une date afin de réaliser votre œuvre. Surveillez votre boîte de réception (et vos pourriels, au besoin). 😊`,
-    serviceDetails: "Détails du service:",
-    dimensions: "Dimensions demandées:",
-    availability: "Disponibilités:",
-    additionalInfo: "Informations supplémentaires:",
-    regards: "Cordialement,",
-    team: "Alexia - Adhenna Tattoo",
-  },
-};
-
-// Generate client email template based on locale
-const generateClientEmailTemplate = (
+/**
+ * Generate client email content for contact form
+ */
+const generateClientEmailContent = (
   formData: ContactFormData,
   locale: LangType
 ): string => {
-  const t = emailTranslations[locale];
+  const t = translations.contact[locale];
 
   return `
-    <!DOCTYPE html>
-    <html lang="${locale}">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${t.title}</title>
-      <style>
-      ${routeStyles}
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>${t.title}</h1>
-        
-        <div class="thank-you">
-          <p>${t.greeting(formData.firstName)}</p>
-          <p>${t.thankYouMessage()}</p>
-        </div>
-        
-        <div class="thank-you">
-          <div class="detail-item">
-            <span class="detail-label">${t.serviceDetails}</span>
-            <p>${formData.plan}</p>
-          </div>
-          
-          <div class="detail-item">
-            <span class="detail-label">${t.dimensions}</span>
-            <p>${formData.width}" x ${formData.length}"</p>
-          </div>
-          
-          <div class="detail-item">
-            <span class="detail-label">${t.availability}</span>
-            <p>${formData.availabilities}</p>
-          </div>
-          
-          ${
-            formData.info
-              ? `
-          <div class="detail-item">
-            <span class="detail-label">${t.additionalInfo}</span>
-            <p>${formData.info}</p>
-          </div>
-          `
-              : ""
-          }
-          
-           
-        </div>
-        <span class="detail-label">${t.regards}<br>${t.team}</span>
+    <h1>${t.title}</h1>
+    
+    <div class="details-section">
+      <p>${t.greeting(formData.firstName)}</p>
+      <p>${t.thankYouMessage}</p>
+    </div>
+    
+    <div class="details-section">
+      <div class="detail-item">
+        <span class="detail-label">${t.serviceDetails}</span>
+        <p>${formData.plan}</p>
       </div>
-    </body>
-    </html>
+      
+      <div class="detail-item">
+        <span class="detail-label">${t.dimensions}</span>
+        <p>${formData.width}" x ${formData.length}"</p>
+      </div>
+      
+      <div class="detail-item">
+        <span class="detail-label">${t.availability}</span>
+        <p>${formData.availabilities}</p>
+      </div>
+      
+      ${
+        formData.info
+          ? `
+      <div class="detail-item">
+        <span class="detail-label">${t.additionalInfo}</span>
+        <p>${formData.info}</p>
+      </div>
+      `
+          : ""
+      }
+    </div>
+    
+    <div class="signature">
+      ${t.regards}<br>${t.team}
+    </div>
   `;
 };
 
+/**
+ * Generate business email content for contact form
+ */
+const generateBusinessEmailContent = (
+  formData: ContactFormData,
+  locale: LangType
+): string => {
+  const t = translations.business.contact;
+
+  return `
+    <h1>${t.title}</h1>
+    
+    <div class="details-section">
+      <h2>${t.customerInfo}</h2>
+      <p>
+        <strong>Nom:</strong> ${formData.firstName} ${formData.lastName}<br>
+        <strong>Courriel:</strong> ${formData.email}<br>
+        <strong>Langue:</strong> ${locale.toUpperCase()}<br>
+      </p>
+    </div>
+
+    <div class="details-section">
+      <h2>${t.serviceDetails}</h2>
+      <p>
+        <strong>${t.service}</strong> ${formData.service}<br>
+        <strong>${t.plan}</strong> ${formData.plan}<br>
+        <strong>${t.dimensions}</strong> ${formData.width}" x ${
+    formData.length
+  }"<br>
+        <strong>${t.availability}</strong> ${formData.availabilities}
+      </p>
+      
+      ${
+        formData.info
+          ? `
+      <h2>${t.additionalInfo}</h2>
+      <p>${formData.info}</p>
+      `
+          : ""
+      }
+    </div>
+  `;
+};
+
+/**
+ * POST handler for contact form email
+ */
 export async function POST(request: Request) {
-  console.log("sending email");
   try {
     const {
       formData,
@@ -107,95 +116,63 @@ export async function POST(request: Request) {
       locale: LangType;
     } = await request.json();
 
-    const attachments = prepareAttachments(formData.uploads); // Prepare attachments
+    // Validate locale
+    if (!["en", "fr"].includes(locale)) {
+      return NextResponse.json(
+        { error: "Invalid locale. Must be 'en' or 'fr'" },
+        { status: 400 }
+      );
+    }
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_BUSINESS,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    const attachments = prepareAttachments(formData.uploads);
+    const transporter = createEmailTransporter();
+    const t = translations.contact[locale as LangType];
+    const tBusiness = translations.business.contact;
 
-    // Generate client email template
-    const clientEmailTemplate = generateClientEmailTemplate(formData, locale);
+    // Generate email templates
+    const clientEmailHtml = createEmailTemplate(
+      locale as LangType,
+      t.title,
+      generateClientEmailContent(formData, locale as LangType)
+    );
 
-    // Business email template
-    const businessEmailTemplate = `
-   <!DOCTYPE html>
-   <html lang="en">
-   <head>
-     <meta charset="UTF-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>New Consultation Request</title>
-      <style>
-        ${routeStyles}
-      </style>
-   </head>
-   <body>
-     <div class="container">
-       <h1>New Consultation Request</h1>
-       
-       <div class="thank-you">
-         <h2>Customer Information:</h2>
-         <p>
-           Name: ${formData.firstName} ${formData.lastName}<br>
-           Email: ${formData.email}<br>
-           Language: ${locale.toUpperCase()}<br>
-         </p>
-       </div>
+    const businessEmailHtml = createEmailTemplate(
+      "fr",
+      tBusiness.title,
+      generateBusinessEmailContent(formData, locale as LangType)
+    );
 
-       <div class="thank-you">
-         <h2>Service Details:</h2>
-         <p>
-           Service: ${formData.service}<br>
-           Plan: ${formData.plan}<br>
-           Dimensions: ${formData.width}" x ${formData.length}"<br>
-           Availability: ${formData.availabilities}
-         </p>
-         
-         ${
-           formData.info
-             ? `
-         <h2>Additional Information:</h2>
-         <p>${formData.info}</p>
-         `
-             : ""
-         }
-         
-        
-       </div>
-     </div>
-   </body>
-   </html>
- `;
-
+    // Send email to client
     await transporter.sendMail({
       from: `"Adhenna Tattoo" <${process.env.EMAIL_BUSINESS}>`,
       to: formData.email,
-      subject: emailTranslations[locale].subject,
-      html: clientEmailTemplate,
+      subject: t.subject,
+      html: clientEmailHtml,
       attachments,
     });
 
     // Send email to business
     await transporter.sendMail({
-      from: `"Adhenna Randez-vous" <${process.env.EMAIL_BUSINESS}>`,
+      from: `"Adhenna Rendez-vous" <${process.env.EMAIL_BUSINESS}>`,
       to: process.env.EMAIL_BUSINESS,
-      subject: `🌸Nouveau rendez-vous - ${formData.firstName} ${
-        formData.lastName
-      } (${locale.toUpperCase()})🌸`,
-      html: businessEmailTemplate,
+      subject: tBusiness.subject(formData.firstName, formData.lastName, locale),
+      html: businessEmailHtml,
       attachments,
     });
 
-    return NextResponse.json({ message: "Emails sent successfully" });
+    return NextResponse.json({
+      message: "Emails sent successfully",
+      success: true,
+    });
   } catch (error) {
-    console.error("Server error:", error);
+    console.error("Error sending contact form emails:", error);
+
     return NextResponse.json(
-      { error: "Failed to send emails", details: error.message },
+      {
+        error: "Failed to send emails",
+        details: error instanceof Error ? error.message : "Unknown error",
+        success: false,
+      },
       { status: 500 }
     );
   }

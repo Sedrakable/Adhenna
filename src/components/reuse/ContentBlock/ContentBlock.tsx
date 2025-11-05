@@ -1,11 +1,42 @@
 "use client";
-import { Fragment } from "react";
+import { Fragment, ReactElement } from "react";
 import styles from "./ContentBlock.module.scss";
 import cn from "classnames";
 
 import { IBlock } from "@/data.d";
 import { Paragraph } from "../Paragraph/Paragraph";
 import { Heading, josefin } from "../Heading";
+import { SanityImage } from "../SanityImage/SanityImage";
+
+// Interface for Sanity's built-in image block
+interface ISanityImageBlock {
+  _type: "image";
+  _key: string;
+  asset: {
+    _ref: string;
+    _type: "reference";
+  };
+  alt?: string;
+  caption?: string;
+  size?: "small" | "medium" | "large" | "full";
+  hotspot?: {
+    x: number;
+    y: number;
+    height: number;
+    width: number;
+  };
+  crop?: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
+}
+
+// Type guard to check if a block is an image block
+const isImageBlock = (block: any): block is ISanityImageBlock => {
+  return block._type === "image";
+};
 
 const renderTextWithMarks = (
   children: IBlock["children"],
@@ -73,6 +104,42 @@ const renderListItem = (block: IBlock) => {
   );
 };
 
+// Render Sanity image blocks
+const renderImageBlock = (block: ISanityImageBlock) => {
+  // Convert Sanity image format to your SanityImage component format
+  const customImageFormat = {
+    image: {
+      asset: block.asset,
+      hotspot: block.hotspot,
+      crop: block.crop,
+    },
+    alt: block.alt || "",
+  };
+
+  return (
+    <div
+      key={block._key}
+      className={cn(
+        styles.imageBlock,
+        styles[`imageBlock--${block.size || "full"}`]
+      )}
+    >
+      <div className={styles.imageWrapper}>
+        <SanityImage {...customImageFormat} quality={80} />
+      </div>
+      {block.caption && (
+        <Paragraph
+          level="small"
+          color="dark-burgundy"
+          className={styles.imageCaption}
+        >
+          {block.caption}
+        </Paragraph>
+      )}
+    </div>
+  );
+};
+
 const renderNonListBlock = (block: IBlock) => {
   const content = renderTextWithMarks(block.children, block.markDefs);
 
@@ -116,8 +183,12 @@ const renderNonListBlock = (block: IBlock) => {
   }
 };
 
-export const contentBlocks = ({ blocks }: { blocks: IBlock[] }) => {
-  const result: JSX.Element[] = [];
+export const contentBlocks = ({
+  blocks,
+}: {
+  blocks: (IBlock | ISanityImageBlock)[];
+}) => {
+  const result: ReactElement[] = [];
   let currentListItems: IBlock[] = [];
   let currentListType: "number" | "bullet" | null = null; // Track the current type of list (numbered or bullet)
   let currentLevel = 1; // Track the current level of the list
@@ -149,6 +220,13 @@ export const contentBlocks = ({ blocks }: { blocks: IBlock[] }) => {
   };
 
   blocks.forEach((block, index) => {
+    // Handle image blocks
+    if (isImageBlock(block)) {
+      flushList();
+      result.push(renderImageBlock(block));
+      return;
+    }
+
     if (block.listItem === "number" || block.listItem === "bullet") {
       // If switching list types or the level changes, flush the current list
       if (block.listItem !== currentListType || block.level !== currentLevel) {
@@ -171,7 +249,10 @@ export const contentBlocks = ({ blocks }: { blocks: IBlock[] }) => {
   return <>{result}</>;
 };
 
-export const renderBlocks = (block: IBlock) => {
+export const renderBlocks = (block: IBlock | ISanityImageBlock) => {
+  if (isImageBlock(block)) {
+    return renderImageBlock(block);
+  }
   if (block.listItem === "number") {
     return renderListItem(block);
   }

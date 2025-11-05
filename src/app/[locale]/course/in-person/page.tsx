@@ -68,8 +68,7 @@ export async function generateMetadata({
   const inPersonCoursePageData: InPersonCoursePageProps = await getInPersonCoursePageData(
     locale
   );
-  const { metaTitle, metaDesc, metaKeywords } =
-    inPersonCoursePageData?.meta || {};
+  const { metaTitle, metaDesc } = inPersonCoursePageData?.meta || {};
   const path = LocalPaths.ONLINE + LocalPaths.IN_PERSON;
   const crawl = true;
 
@@ -77,7 +76,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });
@@ -151,7 +149,7 @@ const Main: React.FC<MainProps> = ({
         gapArray={spaceArray}
         width100
         className={styles.wrapper}
-        flex={{ direction: "column" }}
+        flex={{ direction: "column", y: "stretch" }}
       >
         {image && (
           <SanityImage {...image} figureClassName={styles.image} quality={90} />

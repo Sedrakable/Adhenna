@@ -58,8 +58,7 @@ export async function generateMetadata({
   const hennaServicePageData: HennaServicePageProps = await getHennaServicePageData(
     locale
   );
-  const { metaTitle, metaDesc, metaKeywords } =
-    hennaServicePageData?.meta || {};
+  const { metaTitle, metaDesc } = hennaServicePageData?.meta || {};
   const path = LocalPaths.SERVICE + LocalPaths.HENNA;
   const crawl = true;
 
@@ -67,7 +66,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });

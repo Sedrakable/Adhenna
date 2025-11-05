@@ -1,6 +1,6 @@
 "use client";
 import React, { FC } from "react";
-import { usePathname } from "@/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { Navigation } from "@/components/reuse/Naviagation/Navigation";
 import { ICta, LocalPaths } from "@/data.d";
 import { useLocale } from "next-intl";

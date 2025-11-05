@@ -2,11 +2,12 @@
 
 .langWrapper {
   cursor: pointer;
-  p {
-    margin-top: 6px;
+  .langText {
+    margin-top: 7.5px;
   }
+
   &:hover {
-    p {
+    .langText {
       transition: var(--transition-time);
       color: var(--light-burgundy) !important;
     }

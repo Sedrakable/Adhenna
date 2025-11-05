@@ -43,7 +43,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params; // Await the params
   const homePageData = await getHomePageData(locale);
-  const { metaTitle, metaDesc, metaKeywords } = homePageData.meta;
+  const { metaTitle, metaDesc } = homePageData.meta;
   const path = LocalPaths.HOME;
   const crawl = true;
 
@@ -51,7 +51,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });

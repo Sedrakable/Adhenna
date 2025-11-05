@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import styles from "./Modal.module.scss";
 import cn from "classnames";
-import { Variants, motion } from "framer-motion";
+import { Variants, motion } from "motion/react";
 
 import { Backdrop } from "./Backdrop";
 import FlexDiv from "./FlexDiv";

@@ -1,10 +1,11 @@
 import styles from "./LangSwitcher.module.scss";
 import { useLocale } from "next-intl";
-import { useRouter, usePathname } from "@/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { useTransition } from "react";
 import { useParams } from "next/navigation";
 import FlexDiv from "@/components/reuse/FlexDiv";
 import { Paragraph } from "@/components/reuse/Paragraph/Paragraph";
+import { Heading } from "@/components/reuse/Heading";
 
 export const LangSwitcher: React.FC<{ onClick?: () => void }> = ({
   onClick,
@@ -31,9 +32,18 @@ export const LangSwitcher: React.FC<{ onClick?: () => void }> = ({
 
   return (
     <FlexDiv className={styles.langWrapper} onClick={langClick}>
-      <Paragraph level="big" color="burgundy">
+      <Heading
+        level="6"
+        color="burgundy"
+        as="h4"
+        weight={400}
+        className={styles.langText}
+      >
         {locale === "en" ? "FR" : "EN"}
-      </Paragraph>
+      </Heading>
+      {/* <Paragraph level="big" color="burgundy">
+        {locale === "en" ? "FR" : "EN"}
+      </Paragraph> */}
     </FlexDiv>
   );
 };

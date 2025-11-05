@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useState } from "react";
 
-import { usePathname } from "@/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { Input, TextArea } from "@/components/reuse/Form/Input/Input";
 import { getTranslations } from "@/helpers/langUtils";
@@ -89,7 +89,7 @@ export const FlashForm: FC<FlashFormProps> = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ formData, currentUrl }),
+        body: JSON.stringify({ formData, currentUrl, locale }),
       });
 
       if (response.ok) {

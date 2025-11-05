@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       // disallow: "/", // No additional disallow rules unless needed
-      allow: ["/fr", "/sitemap.xml", "/robots.txt"], // Allow crawling only for the French version
+      allow: ["/fr", "/en", "/sitemap.xml", "/robots.txt"], // Allow crawling only for the French version
     },
     sitemap: `${
       process.env.BASE_NAME || "https://adhennatattoo.com"

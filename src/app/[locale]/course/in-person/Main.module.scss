@@ -10,11 +10,11 @@
 
   @media (min-width: $laptop) {
     --aspect-ratio: 16/9;
-    --version-2-columns: 4;
+    --version-2-columns: 3;
   }
 
   @media (min-width: $desktop) {
-    --version-2-columns: 4;
+    --version-2-columns: 3;
   }
 }
 

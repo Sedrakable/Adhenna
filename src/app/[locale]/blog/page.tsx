@@ -27,7 +27,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params; // Await the params
   const blogPageData: BlogPageProps = await getBlogPageData(locale);
-  const { metaTitle, metaDesc, metaKeywords } = blogPageData.meta;
+  const { metaTitle, metaDesc } = blogPageData.meta;
   const path = LocalPaths.BLOG;
   const crawl = true;
 
@@ -35,7 +35,6 @@ export async function generateMetadata({
     locale,
     metaTitle,
     metaDesc,
-    metaKeywords,
     path,
     crawl,
   });

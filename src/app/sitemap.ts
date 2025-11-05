@@ -62,71 +62,98 @@ const serviceUrls = [
 
 // Combine all static and subpath URLs into a single flat array
 const allUrls = [...baseUrls, ...courseUrls, ...serviceUrls];
+const locales = ["fr", "en"];
 
 // Dynamic routes for portfolio
 const dynamicRouteProjects = ["tattoo", "henna", "flash", "toiles"];
 
 // Generate static entries for portfolio routes
-const generateStaticEntries: MetadataRoute.Sitemap = allUrls.map((baseUrl) => {
-  const url = `https://adhennatattoo.com/fr${baseUrl}`;
+const generateStaticEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
+  allUrls.map((baseUrl) => {
+    const url = `https://adhennatattoo.com/${locale}${baseUrl}`;
 
-  return {
-    url,
-    lastModified: new Date().toISOString(),
-    changeFrequency: "monthly",
-    priority: 1,
-  };
-});
+    return {
+      url,
+      lastModified: new Date().toISOString(),
+      changeFrequency: "monthly",
+      priority: 1,
+      alternates: {
+        languages: {
+          fr: `https://adhennatattoo.com/fr${baseUrl}`,
+          en: `https://adhennatattoo.com/en${baseUrl}`,
+        },
+      },
+    };
+  })
+);
 
 // Generate dynamic entries for portfolio routes
 const generatePortfolioEntries = async (): Promise<MetadataRoute.Sitemap> => {
-  // Resolve all asynchronous operations using Promise.all
   const projectEntries: Promise<MetadataRoute.Sitemap> = Promise.all(
-    dynamicRouteProjects.map(async (projectType) => {
-      const url = `https://adhennatattoo.com/fr/portfolio/${projectType}`;
-      const projectData = await getProjectData(projectType); // Example API call
+    locales.flatMap((locale) =>
+      dynamicRouteProjects.map(async (projectType) => {
+        const url = `https://adhennatattoo.com/${locale}/portfolio/${projectType}`;
+        const projectData = await getProjectData(projectType);
 
-      return {
-        url,
-        lastModified: new Date().toISOString(),
-        changeFrequency: "weekly", // Corrected property name
-        priority: 0.6,
-        images: projectData.map(
-          (project) => urlFor(project.image.image).url() || ""
-        ),
-      };
-    })
+        return {
+          url,
+          lastModified: new Date().toISOString(),
+          changeFrequency: "weekly",
+          priority: 0.6,
+          images: projectData.map(
+            (project) => urlFor(project.image.image).url() || ""
+          ),
+          alternates: {
+            languages: {
+              fr: `https://adhennatattoo.com/fr/portfolio/${projectType}`,
+              en: `https://adhennatattoo.com/en/portfolio/${projectType}`,
+            },
+          },
+        };
+      })
+    )
   );
 
   return projectEntries;
 };
-
 const generateDynamicEntries = async (): Promise<MetadataRoute.Sitemap> => {
   const productData = await getProductData();
   const articleData = await getArticleData();
 
-  const productEntries: MetadataRoute.Sitemap = productData.map(
-    (product: sitemapProductsQueryType) => {
+  const productEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
+    productData.map((product: sitemapProductsQueryType) => {
       return {
-        url: `https://adhennatattoo.com/fr/boutique/${product.path}`,
+        url: `https://adhennatattoo.com/${locale}/boutique/${product.path}`,
         lastModified: product._updatedAt || new Date().toISOString(),
         changeFrequency: "weekly",
         priority: 0.7,
         images: product.images.map((image) => urlFor(image.image).url()),
+        alternates: {
+          languages: {
+            fr: `https://adhennatattoo.com/fr/boutique/${product.path}`,
+            en: `https://adhennatattoo.com/en/boutique/${product.path}`,
+          },
+        },
       };
-    }
+    })
   );
 
-  const articleEntries: MetadataRoute.Sitemap = articleData.map(
-    (article: sitemapArticlesQueryType) => {
+  const articleEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
+    articleData.map((article: sitemapArticlesQueryType) => {
       return {
-        url: `https://adhennatattoo.com/fr/blog/${article.path}`,
+        url: `https://adhennatattoo.com/${locale}/blog/${article.path}`,
         lastModified: article._updatedAt || new Date().toISOString(),
         changeFrequency: "weekly",
         priority: 0.6,
         images: [urlFor(article.customImage.image).url()],
+        alternates: {
+          languages: {
+            fr: `https://adhennatattoo.com/fr/blog/${article.path}`,
+            en: `https://adhennatattoo.com/en/blog/${article.path}`,
+          },
+        },
       };
-    }
+    })
   );
 
   return [...articleEntries, ...productEntries];

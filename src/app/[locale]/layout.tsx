@@ -12,7 +12,6 @@ import { LangType } from "@/i18n/request";
 import { hoursQuery, socialsQuery } from "../api/generateSanityQueries";
 import { Navbar } from "@/components/navbar/Navbar/Navbar";
 import Footer from "@/components/footer/Footer";
-import { redirect } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
