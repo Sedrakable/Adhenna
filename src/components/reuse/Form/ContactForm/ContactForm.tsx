@@ -1,3 +1,4 @@
+// Adhenna - src/components/reuse/Form/ContactForm/ContactForm.tsx
 "use client";
 import React, { useState, useEffect, FC, ReactNode } from "react";
 import styles from "../Form.module.scss";
@@ -7,7 +8,12 @@ import FlexDiv from "../../FlexDiv";
 import { getTranslations } from "@/helpers/langUtils";
 import { useLocale } from "next-intl";
 import { LangType } from "@/i18n/request";
-import { ContactFormData, EncodedFileType, FormErrorData } from "../formTypes";
+import {
+  ContactFormData,
+  EncodedFileType,
+  FormErrorData,
+  looksLikeBot,
+} from "../formTypes";
 import {
   FormTitleProps,
   MultiColumn,
@@ -41,6 +47,7 @@ export const ContactForm: FC<
     width: "4",
     length: "4",
     uploads: [],
+    company: "", // Honeypot field
   });
 
   const [errors, setErrors] = useState<FormErrorData>({});
@@ -66,7 +73,7 @@ export const ContactForm: FC<
   }, [servicesAndPlans]);
 
   const handleInputChange = (field: keyof ContactFormData) => (
-    value: string
+    value: string,
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: false }));
@@ -74,7 +81,7 @@ export const ContactForm: FC<
 
   const handleServiceChange = (selected: string) => {
     const selectedService = servicesAndPlans.find(
-      (item) => item.service.value === selected
+      (item) => item.service.value === selected,
     );
     if (selectedService) {
       setPlans(selectedService.plans);
@@ -122,7 +129,7 @@ export const ContactForm: FC<
             };
             reader.onerror = reject;
             reader.readAsDataURL(file);
-          }
+          },
         );
       });
 
@@ -132,7 +139,6 @@ export const ContactForm: FC<
           uploads: encodedFiles,
         }));
         setUploadedFiles(files);
-        console.log("Uploaded files:", encodedFiles);
       });
     } else {
       setFormData((prev: ContactFormData) => ({ ...prev, uploads: [] }));
@@ -144,6 +150,11 @@ export const ContactForm: FC<
     e.preventDefault();
 
     if (!validateForm()) return;
+
+    if (looksLikeBot(formData)) {
+      console.error("Blocked spam-ish submission");
+      return;
+    }
 
     setLoading(true);
 
@@ -175,16 +186,42 @@ export const ContactForm: FC<
 
   const validateForm = (): boolean => {
     const newErrors: FormErrorData = {};
-    (Object.keys(formData) as Array<keyof ContactFormData>).forEach((key) => {
+    const requiredFields: (keyof ContactFormData)[] = [
+      "firstName",
+      "lastName",
+      "email",
+      "service",
+      "plan",
+      "availabilities",
+      "info",
+      "width",
+      "length",
+    ];
+
+    requiredFields.forEach((key) => {
       if (!formData[key]) {
         newErrors[key] = true;
       }
     });
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      newErrors.email = true;
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const Steps: ReactNode[] = [
+    <Input
+      label="Company"
+      type="text"
+      value={formData.company || ""}
+      onChange={handleInputChange("company")}
+      placeholder=""
+      honeyPot
+    />,
     <MultiColumn>
       <Input
         label={translations.form.general.firstName}
@@ -269,7 +306,7 @@ export const ContactForm: FC<
         onChange={handleLengthChange}
         value={formData.length}
         unit={translations.form.contact.unit}
-        isInvalid={errors.lenght}
+        isInvalid={errors.length}
         required
         step={1}
       />

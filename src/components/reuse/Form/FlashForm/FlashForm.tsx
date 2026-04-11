@@ -1,3 +1,4 @@
+// Adhenna - src/components/reuse/Form/FlashForm/FlashForm.tsx
 import React, { FC, ReactNode, useState } from "react";
 
 import { usePathname } from "@/i18n/navigation";
@@ -14,7 +15,7 @@ import {
   FormSubmitMessage,
   FormSteps,
 } from "../Form";
-import { FlashFormData, FormErrorData } from "../formTypes";
+import { FlashFormData, FormErrorData, looksLikeBot } from "../formTypes";
 import FlexDiv from "../../FlexDiv";
 
 export interface FlashFormProps {
@@ -44,6 +45,7 @@ export const FlashForm: FC<FlashFormProps> = ({
     bodyPosition: "",
     availabilities: "",
     additionalComments: "",
+    company: "", // Honeypot field
   });
 
   const [errors, setErrors] = useState<FormErrorData>({});
@@ -74,13 +76,24 @@ export const FlashForm: FC<FlashFormProps> = ({
       }
     });
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      newErrors.email = true;
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!validateForm()) return;
+
+    if (looksLikeBot(formData)) {
+      console.error("Blocked spam-ish submission");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -110,6 +123,14 @@ export const FlashForm: FC<FlashFormProps> = ({
   };
 
   const Steps: ReactNode[] = [
+    <Input
+      label="Company"
+      type="text"
+      value={formData.company || ""}
+      onChange={handleInputChange("company")}
+      placeholder=""
+      honeyPot
+    />,
     <MultiColumn>
       <Input
         label={translations.form.general.firstName}
