@@ -1,3 +1,4 @@
+// Adhenna - src/components/reuse/Form/CartForm/CartForm.tsx
 "use client";
 import React, { useState, useEffect, FC, ReactNode } from "react";
 
@@ -9,7 +10,7 @@ import FlexDiv from "../../FlexDiv";
 import { getTranslations } from "@/helpers/langUtils";
 import { useLocale } from "next-intl";
 import { LangType } from "@/i18n/request";
-import { AddressFormData, FormErrorData } from "../formTypes";
+import { AddressFormData, FormErrorData, looksLikeBot } from "../formTypes";
 import {
   FormSteps,
   FormSubmitButton,
@@ -49,6 +50,7 @@ export const CartForm: FC<CartFormProps> = ({
     city: "Montréal",
     delivery: "",
     message: "",
+    company: "", // Honeypot field
   });
 
   const [errors, setErrors] = useState<FormErrorData>({});
@@ -64,7 +66,7 @@ export const CartForm: FC<CartFormProps> = ({
     (method: IDeliveryMethod) => ({
       value: methodToString(method),
       label: methodToString(method),
-    })
+    }),
   );
   const [states, setStates] = useState<OptionType[]>([]);
   const [cities, setCities] = useState<OptionType[]>([]);
@@ -75,13 +77,13 @@ export const CartForm: FC<CartFormProps> = ({
       State.getStatesOfCountry(defaultCountry).map((state) => ({
         value: state.isoCode,
         label: state.name,
-      }))
+      })),
     );
     setCities(
       City.getCitiesOfState(formData.country, defaultState).map((city) => ({
         value: city.name,
         label: city.name,
-      }))
+      })),
     );
   }, []);
 
@@ -92,7 +94,7 @@ export const CartForm: FC<CartFormProps> = ({
       City.getCitiesOfState(formData.country, stateCode).map((city) => ({
         value: city.name,
         label: city.name,
-      }))
+      })),
     );
   };
 
@@ -102,7 +104,7 @@ export const CartForm: FC<CartFormProps> = ({
   };
 
   const handleInputChange = (field: keyof AddressFormData) => (
-    value: string
+    value: string,
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -127,6 +129,11 @@ export const CartForm: FC<CartFormProps> = ({
     e.preventDefault();
 
     if (!validateForm()) return;
+
+    if (looksLikeBot(formData)) {
+      console.error("Blocked spam-ish submission");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -156,20 +163,42 @@ export const CartForm: FC<CartFormProps> = ({
 
   const validateForm = (): boolean => {
     const newErrors: FormErrorData = {};
-    Object.keys(formData).forEach((key) => {
-      if (
-        !formData[key as keyof AddressFormData] &&
-        key !== "addressLine2" &&
-        key !== "message"
-      ) {
+    const requiredFields: (keyof AddressFormData)[] = [
+      "firstName",
+      "lastName",
+      "email",
+      "addressLine1",
+      "postalCode",
+      "country",
+      "state",
+      "city",
+      "delivery",
+    ];
+
+    requiredFields.forEach((key) => {
+      if (!formData[key]) {
         newErrors[key] = true;
       }
     });
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      newErrors.email = true;
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const Steps: ReactNode[] = [
+    <Input
+      label="Company"
+      type="text"
+      value={formData.company || ""}
+      onChange={handleInputChange("company")}
+      placeholder=""
+      honeyPot
+    />,
     <MultiColumn>
       <Input
         label={translations.form.general.firstName}

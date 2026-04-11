@@ -1,7 +1,9 @@
+// Adhenna - src/components/reuse/Form/formTypes.ts
 export interface BaseFormData {
   firstName: string;
   lastName: string;
   email: string;
+  company?: string;
 }
 
 export interface AddressFormData extends BaseFormData {
@@ -49,5 +51,25 @@ export interface FormErrorData {
 }
 
 export interface StepProps {
-  number: number;
+  number: number | undefined;
 }
+
+export const looksLikeBot = (formData: BaseFormData): boolean => {
+  const honeypotFilled =
+    typeof formData.company === "string" && formData.company.trim().length > 0;
+
+  if (honeypotFilled) return true;
+
+  const email = formData.email?.trim() ?? "";
+  const firstName = formData.firstName?.trim() ?? "";
+  const lastName = formData.lastName?.trim() ?? "";
+
+  const invalidEmail = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const suspiciousName =
+    firstName.length === 0 ||
+    lastName.length === 0 ||
+    firstName.length > 80 ||
+    lastName.length > 80;
+
+  return invalidEmail || suspiciousName;
+};

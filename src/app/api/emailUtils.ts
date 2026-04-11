@@ -9,7 +9,7 @@ import { LangType } from "@/i18n/request";
 const validateEnvVars = () => {
   if (!process.env.EMAIL_BUSINESS || !process.env.EMAIL_PASS) {
     throw new Error(
-      "Missing required environment variables: EMAIL_BUSINESS and/or EMAIL_PASS"
+      "Missing required environment variables: EMAIL_BUSINESS and/or EMAIL_PASS",
     );
   }
 };
@@ -50,7 +50,7 @@ export const prepareAttachments = (attachments: EncodedFileType[]) => {
       throw new Error(
         `File ${attach.name} exceeds maximum size of ${
           MAX_FILE_SIZE / 1024 / 1024
-        }MB`
+        }MB`,
       );
     }
 
@@ -73,7 +73,7 @@ export const formatCurrency = (num: number): string => {
 export const createEmailTemplate = (
   locale: LangType,
   title: string,
-  content: string
+  content: string,
 ): string => {
   return `
     <!DOCTYPE html>
@@ -95,3 +95,14 @@ export const createEmailTemplate = (
     </html>
   `;
 };
+
+export const escapeHtml = (value: string): string =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+export const safeText = (value: unknown): string =>
+  escapeHtml(typeof value === "string" ? value : "");

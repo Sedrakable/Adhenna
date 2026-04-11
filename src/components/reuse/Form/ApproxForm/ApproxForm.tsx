@@ -1,3 +1,4 @@
+// Adhenna - src/components/reuse/Form/ApproxForm/ApproxForm.tsx
 "use client";
 import React, { useState, FC, ReactNode } from "react";
 import styles from "../Form.module.scss";
@@ -7,7 +8,12 @@ import FlexDiv from "../../FlexDiv";
 import { getTranslations } from "@/helpers/langUtils";
 import { useLocale } from "next-intl";
 import { LangType } from "@/i18n/request";
-import { ApproxFormData, EncodedFileType, FormErrorData } from "../formTypes";
+import {
+  ApproxFormData,
+  EncodedFileType,
+  FormErrorData,
+  looksLikeBot,
+} from "../formTypes";
 import {
   FormSteps,
   FormSubmitButton,
@@ -34,6 +40,7 @@ export const ApproxForm: FC<
     width: "4",
     length: "4",
     uploads: [],
+    company: "", // Honeypot field
   });
 
   const [errors, setErrors] = useState<FormErrorData>({});
@@ -43,7 +50,7 @@ export const ApproxForm: FC<
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   const handleInputChange = (field: keyof ApproxFormData) => (
-    value: string
+    value: string,
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: false }));
@@ -78,7 +85,7 @@ export const ApproxForm: FC<
             };
             reader.onerror = reject;
             reader.readAsDataURL(file);
-          }
+          },
         );
       });
 
@@ -88,7 +95,6 @@ export const ApproxForm: FC<
           uploads: encodedFiles,
         }));
         setUploadedFiles(files);
-        console.log("Uploaded files:", encodedFiles);
       });
     } else {
       setFormData((prev: ApproxFormData) => ({ ...prev, uploads: [] }));
@@ -100,6 +106,11 @@ export const ApproxForm: FC<
     e.preventDefault();
 
     if (!validateForm()) return;
+
+    if (looksLikeBot(formData)) {
+      console.error("Blocked spam-ish submission");
+      return;
+    }
 
     setLoading(true);
 
@@ -132,16 +143,39 @@ export const ApproxForm: FC<
 
   const validateForm = (): boolean => {
     const newErrors: FormErrorData = {};
-    (Object.keys(formData) as Array<keyof ApproxFormData>).forEach((key) => {
+    const requiredFields: (keyof ApproxFormData)[] = [
+      "firstName",
+      "lastName",
+      "email",
+      "info",
+      "width",
+      "length",
+    ];
+
+    requiredFields.forEach((key) => {
       if (!formData[key]) {
         newErrors[key] = true;
       }
     });
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      newErrors.email = true;
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const Steps: ReactNode[] = [
+    <Input
+      label="Company"
+      type="text"
+      value={formData.company || ""}
+      onChange={handleInputChange("company")}
+      placeholder=""
+      honeyPot
+    />,
     <MultiColumn>
       <Input
         label={translations.form.general.firstName}
@@ -198,7 +232,7 @@ export const ApproxForm: FC<
         onChange={handleLengthChange}
         value={formData.length}
         unit={translations.form.contact.unit}
-        isInvalid={errors.lenght}
+        isInvalid={errors.length}
         required
         step={1}
       />

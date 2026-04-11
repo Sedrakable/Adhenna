@@ -65,15 +65,17 @@ export const Step: FC<PropsWithChildren<StepProps>> = ({
       className={styles.step}
       key={number}
     >
-      <Heading
-        as="h4"
-        level="4"
-        color="burgundy"
-        weight={400}
-        className={styles.number}
-      >
-        {number.toString()}
-      </Heading>
+      {number && (
+        <Heading
+          as="h4"
+          level="4"
+          color="burgundy"
+          weight={400}
+          className={styles.number}
+        >
+          {number.toString()}
+        </Heading>
+      )}
       <FlexDiv
         gapArray={[3, 4]}
         flex={{ direction: "column" }}
@@ -121,18 +123,25 @@ export const FormSubmitButton: FC<{
 
 export const FormSteps: FC<{
   steps: ReactNode[];
-}> = ({ steps }) => {
+  stepNumbers?: boolean;
+}> = ({ steps, stepNumbers = true }) => {
   return (
     <FlexDiv
       gapArray={[5, 5, 5, 5]}
       width100
       flex={{ direction: "column", x: "stretch", y: "flex-start" }}
     >
-      {steps.map((step, index) => (
-        <Step key={index} number={index + 1}>
-          {step}
-        </Step>
-      ))}
+      {steps.map((step, index) => {
+        if (index === 0) {
+          return;
+        } else {
+          return (
+            <Step key={index} number={stepNumbers ? index : undefined}>
+              {step}
+            </Step>
+          );
+        }
+      })}
     </FlexDiv>
   );
 };
