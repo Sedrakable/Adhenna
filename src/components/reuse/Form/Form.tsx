@@ -124,7 +124,7 @@ export const FormSubmitButton: FC<{
 export const FormSteps: FC<{
   steps: ReactNode[];
   stepNumbers?: boolean;
-}> = ({ steps, stepNumbers = true }) => {
+}> = ({ steps, stepNumbers = false }) => {
   return (
     <FlexDiv
       gapArray={[5, 5, 5, 5]}
@@ -132,15 +132,11 @@ export const FormSteps: FC<{
       flex={{ direction: "column", x: "stretch", y: "flex-start" }}
     >
       {steps.map((step, index) => {
-        if (index === 0) {
-          return;
-        } else {
-          return (
-            <Step key={index} number={stepNumbers ? index : undefined}>
-              {step}
-            </Step>
-          );
-        }
+        return (
+          <Step key={index} number={stepNumbers ? index : undefined}>
+            {step}
+          </Step>
+        );
       })}
     </FlexDiv>
   );
