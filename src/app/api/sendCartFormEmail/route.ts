@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     if (!["en", "fr"].includes(locale)) {
       return NextResponse.json(
-        { error: "Invalid locale. Must be 'en' or 'fr'" },
+        { ok: false, error: "Invalid locale. Must be 'en' or 'fr'" },
         { status: 400 },
       );
     }
@@ -50,17 +50,25 @@ export async function POST(request: Request) {
       transporter.sendMail({
         from: `"Adhenna Tattoo" <${process.env.EMAIL_BUSINESS}>`,
         to: process.env.EMAIL_BUSINESS,
-        subject: `${tBusiness.title} - ${formData.firstName} ${formData.lastName}`,
+        subject: tBusiness.subject(
+          formData.firstName,
+          formData.lastName,
+          locale,
+        ),
         html: getCartBusinessTemplate(formData, cart, deliveryPrice, locale),
       }),
     ]);
 
-    return NextResponse.json({ message: "Emails sent successfully" });
+    return NextResponse.json({ ok: true, message: "Emails sent successfully" });
   } catch (error) {
     console.error("Server error:", error);
 
     return NextResponse.json(
-      { error: "Failed to send emails", details: (error as Error).message },
+      {
+        ok: false,
+        error: "Failed to send emails",
+        details: (error as Error).message,
+      },
       { status: 500 },
     );
   }

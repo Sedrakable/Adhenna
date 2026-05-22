@@ -20,6 +20,12 @@ import {
 } from "../Form";
 import { CartProps } from "@/components/pages/blocks/Cart/Cart";
 import { ICartProduct, IDeliveryMethod } from "@/data.d";
+import { useFormSubmission } from "../useFormSubmission";
+import {
+  hasFormErrors,
+  validateEmailField,
+  validateRequiredFields,
+} from "../formValidation";
 
 export interface CartFormProps extends CartProps {
   cart: ICartProduct[];
@@ -54,8 +60,8 @@ export const CartForm: FC<CartFormProps> = ({
   });
 
   const [errors, setErrors] = useState<FormErrorData>({});
-  const [submit, setSubmit] = useState<string | false>(false);
-  const [loading, setLoading] = useState(false); // New loading state
+  const { loading, submitted, submitForm, submitText } =
+    useFormSubmission(translations);
 
   const methodToString = (method: IDeliveryMethod) => {
     return `${method.method}${
@@ -135,34 +141,13 @@ export const CartForm: FC<CartFormProps> = ({
       return;
     }
 
-    setLoading(true);
-    try {
-      const response = await fetch("/api/sendCartFormEmail", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ formData, cart, deliveryPrice, locale }),
-      });
-
-      if (response.ok) {
-        setSubmit(translations.form.general.emailSent);
-        // Add success handling (e.g., show success message, reset form)
-      } else {
-        console.error("Failed to send request", response);
-        setSubmit(translations.form.general.emailNotSent);
-        // Add error handling (e.g., show error message)
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setSubmit(translations.form.general.emailNotSent);
-    } finally {
-      setLoading(false); // Set loading to false after submission
-    }
+    await submitForm({
+      endpoint: "/api/sendCartFormEmail",
+      body: { formData, cart, deliveryPrice, locale },
+    });
   };
 
   const validateForm = (): boolean => {
-    const newErrors: FormErrorData = {};
     const requiredFields: (keyof AddressFormData)[] = [
       "firstName",
       "lastName",
@@ -175,19 +160,12 @@ export const CartForm: FC<CartFormProps> = ({
       "delivery",
     ];
 
-    requiredFields.forEach((key) => {
-      if (!formData[key]) {
-        newErrors[key] = true;
-      }
-    });
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
-      newErrors.email = true;
-    }
-
+    const newErrors = validateEmailField(
+      validateRequiredFields(formData, requiredFields),
+      formData.email,
+    );
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return !hasFormErrors(newErrors);
   };
 
   const Steps: ReactNode[] = [
@@ -286,15 +264,15 @@ export const CartForm: FC<CartFormProps> = ({
 
   return (
     <FlexDiv width100>
-      {submit === translations.form.general.emailSent ? (
+      {submitted ? (
         <FormSubmitMessage locale={locale} translations={translations} />
       ) : (
         <form onSubmit={handleSubmit} className={styles.form}>
           <FormTitles title={title} subTitle={subTitle} alignText="left" />
           <FormSteps steps={Steps} />
           <FormSubmitButton
-            submitText={submit}
-            isValid={Object.keys(errors).length === 0}
+            submitText={submitText}
+            isValid={!hasFormErrors(errors)}
             translations={translations}
             loading={loading}
           />

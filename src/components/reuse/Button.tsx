@@ -124,7 +124,7 @@ export const Button: FC<PropsWithChildren<
       <button
         {...buttonProps}
         onClick={handleClick}
-        // disabled={disabled}
+        disabled={disabled}
         {...(props as ButtonHTMLAttributes<HTMLButtonElement>)}
       >
         {buttonContent}

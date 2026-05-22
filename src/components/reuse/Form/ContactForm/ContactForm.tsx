@@ -8,12 +8,7 @@ import FlexDiv from "../../FlexDiv";
 import { getTranslations } from "@/helpers/langUtils";
 import { useLocale } from "next-intl";
 import { LangType } from "@/i18n/request";
-import {
-  ContactFormData,
-  EncodedFileType,
-  FormErrorData,
-  looksLikeBot,
-} from "../formTypes";
+import { ContactFormData, FormErrorData, looksLikeBot } from "../formTypes";
 import {
   FormTitleProps,
   MultiColumn,
@@ -22,6 +17,13 @@ import {
 } from "../Form";
 import { Slider } from "../Slider/Slider";
 import { UploadButton } from "../UploadButton/UploadButton";
+import { encodeFiles } from "../formFiles";
+import { useFormSubmission } from "../useFormSubmission";
+import {
+  hasFormErrors,
+  validateEmailField,
+  validateRequiredFields,
+} from "../formValidation";
 
 export interface ServicesAndPlans {
   service: OptionType;
@@ -51,12 +53,15 @@ export const ContactForm: FC<
   });
 
   const [errors, setErrors] = useState<FormErrorData>({});
-  const [submit, setSubmit] = useState<string | false>(false);
-  const [loading, setLoading] = useState(false); // New loading state
+  const { loading, submitForm, submitText } = useFormSubmission(
+    translations,
+    () => onSubmit(true),
+  );
 
   const [services, setServices] = useState<OptionType[]>([]);
   const [plans, setPlans] = useState<OptionType[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
 
   useEffect(() => {
     if (servicesAndPlans.length > 0) {
@@ -113,33 +118,14 @@ export const ContactForm: FC<
     }
   };
 
-  const handleFileUpload = (files: File[]) => {
+  const handleFileUpload = async (files: File[]) => {
     if (files.length > 0) {
-      const filePromises: Promise<EncodedFileType>[] = files.map((file) => {
-        return new Promise<{ name: string; type: string; data: string }>(
-          (resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              const fileData = (event.target?.result as string)?.split(",")[1];
-              resolve({
-                name: file.name,
-                type: file.type,
-                data: fileData,
-              });
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          },
-        );
-      });
-
-      Promise.all(filePromises).then((encodedFiles) => {
-        setFormData((prev: ContactFormData) => ({
-          ...prev,
-          uploads: encodedFiles,
-        }));
-        setUploadedFiles(files);
-      });
+      const encodedFiles = await encodeFiles(files);
+      setFormData((prev: ContactFormData) => ({
+        ...prev,
+        uploads: encodedFiles,
+      }));
+      setUploadedFiles(files);
     } else {
       setFormData((prev: ContactFormData) => ({ ...prev, uploads: [] }));
       setUploadedFiles([]);
@@ -149,6 +135,8 @@ export const ContactForm: FC<
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (uploadingFiles) return;
+
     if (!validateForm()) return;
 
     if (looksLikeBot(formData)) {
@@ -156,36 +144,13 @@ export const ContactForm: FC<
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/sendContactFormEmail", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ formData, locale }),
-      });
-
-      if (response.ok) {
-        setSubmit(translations.form.general.emailSent);
-        onSubmit(true);
-        // Add success handling (e.g., show success message, reset form)
-      } else {
-        console.error("Failed to send request", response);
-        setSubmit(translations.form.general.emailNotSent);
-        // Add error handling (e.g., show error message)
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setSubmit(translations.form.general.emailNotSent);
-    } finally {
-      setLoading(false); // Set loading to false after submission
-    }
+    await submitForm({
+      endpoint: "/api/sendContactFormEmail",
+      body: { formData, locale },
+    });
   };
 
   const validateForm = (): boolean => {
-    const newErrors: FormErrorData = {};
     const requiredFields: (keyof ContactFormData)[] = [
       "firstName",
       "lastName",
@@ -198,19 +163,12 @@ export const ContactForm: FC<
       "length",
     ];
 
-    requiredFields.forEach((key) => {
-      if (!formData[key]) {
-        newErrors[key] = true;
-      }
-    });
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
-      newErrors.email = true;
-    }
-
+    const newErrors = validateEmailField(
+      validateRequiredFields(formData, requiredFields),
+      formData.email,
+    );
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return !hasFormErrors(newErrors);
   };
 
   const Steps: ReactNode[] = [
@@ -316,7 +274,8 @@ export const ContactForm: FC<
       accept="image/*"
       uploadedFiles={uploadedFiles}
       isInvalid={errors.upload}
-      maxFiles={3}
+      maxFiles={8}
+      onProcessingChange={setUploadingFiles}
     />,
   ];
 
@@ -325,10 +284,10 @@ export const ContactForm: FC<
       <form onSubmit={handleSubmit} className={styles.form}>
         <FormSteps steps={Steps} />
         <FormSubmitButton
-          isValid={Object.keys(errors).length === 0}
+          isValid={!hasFormErrors(errors)}
           translations={translations}
-          submitText={submit}
-          loading={loading}
+          submitText={submitText}
+          loading={loading || uploadingFiles}
         />
       </form>
     </FlexDiv>
