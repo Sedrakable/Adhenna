@@ -104,7 +104,11 @@ export const FormSubmitButton: FC<{
   const { isMobile } = useWindowResize();
 
   return (
-    <FlexDiv className={styles.submitWrapper} gapArray={[2]}>
+    <FlexDiv
+      className={styles.submitWrapper}
+      gapArray={[2]}
+      padding={{ top: [5] }}
+    >
       <Button type="submit" variant="primary" disabled={loading}>
         {translations.buttons.submit}
       </Button>

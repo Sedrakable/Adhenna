@@ -25,7 +25,7 @@ export const Pill: FC<PropsWithChildren<PillProps>> = ({
   version = "1",
 }) => {
   const [value, setValue] = useState<number | "">(() =>
-    initialValue === undefined ? "" : initialValue
+    initialValue === undefined ? "" : initialValue,
   );
 
   const handleIncrement = () => {
@@ -76,7 +76,7 @@ export const Pill: FC<PropsWithChildren<PillProps>> = ({
     <FlexDiv
       className={cn(styles.pill, styles[`version${version}`])}
       padding={{ horizontal: [4], vertical: [2] }}
-      gapArray={[4, 4, 4, 4]}
+      gapArray={[3, 4, 4, 4]}
     >
       <button
         className={cn(styles.minus, {

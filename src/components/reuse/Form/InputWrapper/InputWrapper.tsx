@@ -25,6 +25,7 @@ export const InputWrapper: React.FC<PropsWithChildren<InputWrapperProps>> = ({
       className={cn(styles.inputContainer, {
         [styles.honeyPot]: honeyPot,
       })}
+      aria-hidden={honeyPot || undefined}
       flex={{ direction: "column" }}
       gapArray={[2]}
       as="label"

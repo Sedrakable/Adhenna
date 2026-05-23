@@ -82,6 +82,58 @@ tr:nth-child(even) {
   margin-bottom: 5px;
 }
 
+.invoice-header {
+  display: table;
+  width: 100%;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #dcb2c1;
+  padding-bottom: 18px;
+}
+
+.invoice-header > div {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.invoice-meta {
+  text-align: right;
+  width: 190px;
+}
+
+.invoice-meta p {
+  margin-bottom: 8px;
+}
+
+.eyebrow {
+  color: #853d57;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.invoice-parties {
+  display: table;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.invoice-parties > div {
+  display: table-cell;
+  width: 50%;
+  vertical-align: top;
+  padding-right: 16px;
+}
+
+.invoice-tax-numbers {
+  margin-top: 8px;
+}
+
+.invoice-tax-numbers span {
+  display: block;
+}
+
 p {
   margin: 0 0 10px;
   color: #2a131c;

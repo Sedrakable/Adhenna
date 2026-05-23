@@ -19,7 +19,7 @@ import { AnimatedWrapper } from "@/components/reuse/AnimatedWrapper/AnimatedWrap
 import { useGoogleEvent } from "@/app/api/sendGoogleEvent";
 
 export const ProductCard: React.FC<IProduct> = (props) => {
-  const { images, title, price, quantityDesc, path } = props;
+  const { images, title, price, originalPrice, quantityDesc, path } = props;
   const locale = useLocale() as LangType;
   const translations = getTranslations(locale);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -90,14 +90,26 @@ export const ProductCard: React.FC<IProduct> = (props) => {
                 className={styles.textWrapper}
                 gapArray={[2]}
               >
-                <Paragraph
-                  level="regular"
-                  color="burgundy"
-                  weight={500}
-                  className={styles.price}
-                >
-                  {price}
-                </Paragraph>
+                <FlexDiv className={styles.priceWrapper} gapArray={[2]}>
+                  <Paragraph
+                    level="regular"
+                    color="burgundy"
+                    weight={500}
+                    className={styles.price}
+                  >
+                    {price}
+                  </Paragraph>
+                  {originalPrice && (
+                    <Paragraph
+                      level="regular"
+                      color="burgundy"
+                      weight={500}
+                      className={styles.originalPrice}
+                    >
+                      {`(${originalPrice})`}
+                    </Paragraph>
+                  )}
+                </FlexDiv>
                 {quantityDesc && (
                   <>
                     <Paragraph

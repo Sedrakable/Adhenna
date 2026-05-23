@@ -4,15 +4,27 @@ import { LangType } from "@/i18n/request";
 import { createEmailTemplate, formatCurrency, safeText } from "../emailUtils";
 import { translations } from "../emailTranslations";
 
+const GST_RATE = 0.05;
+const QST_RATE = 0.09975;
+
+const getInvoiceDate = (locale: LangType): string =>
+  new Intl.DateTimeFormat(locale === "fr" ? "fr-CA" : "en-CA", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
+
 const calculateOrderTotals = (cart: ICartProduct[], deliveryPrice: number) => {
   const subtotal = cart.reduce(
     (total, item) => total + item.quantity * parseFloat(item.product.price),
     0,
   );
-  const taxes = (subtotal + deliveryPrice) * 0.15;
-  const grandTotal = subtotal + deliveryPrice + taxes;
+  const taxableTotal = subtotal + deliveryPrice;
+  const gst = taxableTotal * GST_RATE;
+  const qst = taxableTotal * QST_RATE;
+  const grandTotal = taxableTotal + gst + qst;
 
-  return { subtotal, taxes, grandTotal };
+  return { subtotal, gst, qst, grandTotal };
 };
 
 const getProductTable = (
@@ -20,7 +32,7 @@ const getProductTable = (
   deliveryPrice: number,
   locale: LangType,
 ): string => {
-  const { subtotal, taxes, grandTotal } = calculateOrderTotals(
+  const { subtotal, gst, qst, grandTotal } = calculateOrderTotals(
     cart,
     deliveryPrice,
   );
@@ -62,8 +74,12 @@ const getProductTable = (
           <td>${formatCurrency(deliveryPrice)} $</td>
         </tr>
         <tr>
-          <td colspan="3">${t.taxes}</td>
-          <td>${formatCurrency(taxes)} $</td>
+          <td colspan="3">${t.gst}</td>
+          <td>${formatCurrency(gst)} $</td>
+        </tr>
+        <tr>
+          <td colspan="3">${t.qst}</td>
+          <td>${formatCurrency(qst)} $</td>
         </tr>
         <tr class="total">
           <td colspan="3"><strong>${t.grandTotal}</strong></td>
@@ -71,6 +87,23 @@ const getProductTable = (
         </tr>
       </tbody>
     </table>
+  `;
+};
+
+const getTaxNumbers = (locale: LangType): string => {
+  const t = translations.cart[locale];
+  const gstNumber = process.env.EMAIL_GST_NUMBER;
+  const qstNumber = process.env.EMAIL_QST_NUMBER;
+
+  if (!gstNumber && !qstNumber) {
+    return "";
+  }
+
+  return `
+    <div class="invoice-tax-numbers">
+      ${gstNumber ? `<span>${t.gstNumber}: ${safeText(gstNumber)}</span>` : ""}
+      ${qstNumber ? `<span>${t.qstNumber}: ${safeText(qstNumber)}</span>` : ""}
+    </div>
   `;
 };
 
@@ -86,11 +119,48 @@ const getShippingInfo = (formData: AddressFormData): string => {
   `;
 };
 
+const getInvoiceHeader = (
+  locale: LangType,
+  orderNumber: string,
+  formData: AddressFormData,
+): string => {
+  const t = translations.cart[locale];
+
+  return `
+    <div class="invoice-header">
+      <div>
+        <p class="eyebrow">${t.invoice}</p>
+        <h1>${t.title}</h1>
+      </div>
+      <div class="invoice-meta">
+        <p><strong>${t.invoiceNumber}</strong><br>${safeText(orderNumber)}</p>
+        <p><strong>${t.invoiceDate}</strong><br>${getInvoiceDate(locale)}</p>
+      </div>
+    </div>
+
+    <div class="invoice-parties">
+      <div>
+        <h2>${t.seller}</h2>
+        <p>Adhenna Tattoo</p>
+        ${getTaxNumbers(locale)}
+      </div>
+      <div>
+        <h2>${t.customer}</h2>
+        <p>
+          ${safeText(formData.firstName)} ${safeText(formData.lastName)}<br>
+          ${safeText(formData.email)}
+        </p>
+      </div>
+    </div>
+  `;
+};
+
 export const getCartClientTemplate = (
   formData: AddressFormData,
   cart: ICartProduct[],
   deliveryPrice: number,
   locale: LangType,
+  orderNumber: string,
 ): string => {
   const t = translations.cart[locale];
 
@@ -98,7 +168,7 @@ export const getCartClientTemplate = (
     locale,
     t.title,
     `
-      <h1>${t.title}</h1>
+      ${getInvoiceHeader(locale, orderNumber, formData)}
 
       <div class="details-section">
         <p>${t.greeting(safeText(formData.firstName))}</p>
@@ -139,6 +209,7 @@ export const getCartBusinessTemplate = (
   cart: ICartProduct[],
   deliveryPrice: number,
   locale: LangType,
+  orderNumber: string,
 ): string => {
   const t = translations.business.cart;
 
@@ -146,6 +217,8 @@ export const getCartBusinessTemplate = (
     "fr",
     t.title,
     `
+      ${getInvoiceHeader("fr", orderNumber, formData)}
+
       <h1>${t.title}</h1>
 
       <div class="details-section">

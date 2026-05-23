@@ -15,7 +15,11 @@ import {
   FormSubmitMessage,
   FormSteps,
 } from "../Form";
-import { FlashFormData, FormErrorData, looksLikeBot } from "../formTypes";
+import {
+  FlashFormData,
+  FormErrorData,
+  getBotDetectionReason,
+} from "../formTypes";
 import FlexDiv from "../../FlexDiv";
 import { useFormSubmission } from "../useFormSubmission";
 import {
@@ -88,8 +92,9 @@ export const FlashForm: FC<FlashFormProps> = ({
 
     if (!validateForm()) return;
 
-    if (looksLikeBot(formData)) {
-      console.error("Blocked spam-ish submission");
+    const botReason = getBotDetectionReason(formData);
+    if (botReason) {
+      console.error("Blocked spam-ish submission:", botReason);
       return;
     }
 
@@ -101,7 +106,7 @@ export const FlashForm: FC<FlashFormProps> = ({
 
   const Steps: ReactNode[] = [
     <Input
-      label="Company"
+      label="Form check"
       type="text"
       value={formData.company || ""}
       onChange={handleInputChange("company")}

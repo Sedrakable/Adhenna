@@ -16,6 +16,14 @@ interface RequestData {
   locale: LangType;
 }
 
+const createOrderNumber = (): string => {
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10).replace(/-/g, "");
+  const suffix = now.getTime().toString().slice(-6);
+
+  return `ADH-${date}-${suffix}`;
+};
+
 export async function POST(request: Request) {
   try {
     const {
@@ -39,13 +47,20 @@ export async function POST(request: Request) {
     const transporter = createEmailTransporter();
     const t = translations.cart[locale];
     const tBusiness = translations.business.cart;
+    const orderNumber = createOrderNumber();
 
     await Promise.all([
       transporter.sendMail({
         from: `"Adhenna Tattoo" <${process.env.EMAIL_BUSINESS}>`,
         to: formData.email,
         subject: t.subject,
-        html: getCartClientTemplate(formData, cart, deliveryPrice, locale),
+        html: getCartClientTemplate(
+          formData,
+          cart,
+          deliveryPrice,
+          locale,
+          orderNumber,
+        ),
       }),
       transporter.sendMail({
         from: `"Adhenna Tattoo" <${process.env.EMAIL_BUSINESS}>`,
@@ -55,7 +70,13 @@ export async function POST(request: Request) {
           formData.lastName,
           locale,
         ),
-        html: getCartBusinessTemplate(formData, cart, deliveryPrice, locale),
+        html: getCartBusinessTemplate(
+          formData,
+          cart,
+          deliveryPrice,
+          locale,
+          orderNumber,
+        ),
       }),
     ]);
 

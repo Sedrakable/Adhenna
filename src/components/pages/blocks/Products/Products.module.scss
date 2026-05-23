@@ -49,6 +49,20 @@
   }
 }
 
+.priceWrapper {
+  width: auto !important;
+  flex-wrap: wrap !important;
+
+  p {
+    width: auto !important;
+  }
+}
+
+.originalPrice {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
 .productModal {
   @media (min-width: $laptop) {
     display: grid !important;
@@ -82,6 +96,7 @@
   flex-wrap: var(--wrap) !important;
   background-color: var(--white);
   border-radius: var(--border-radius);
+
   @media (min-width: $laptop) {
     justify-content: space-between;
   }
@@ -92,23 +107,18 @@
       width: var(--product-tab-img-size) !important;
       border-radius: var(--border-radius);
     }
-    // .text {
-    //   .desc {
-    //     $number-of-lines: 2;
-    //     width: 100% !important;
-    //     text-wrap: wrap;
-    //     display: -webkit-box; /* Enables the flexbox-based truncation */
-    //     -webkit-box-orient: vertical; /* Sets the box's orientation to vertical */
-    //     overflow: hidden; /* Hides the overflowing text */
-    //     text-overflow: ellipsis; /* Adds the three dots (...) */
-    //     -webkit-line-clamp: $number-of-lines; /* Limits the paragraph to 3 lines */
-    //     max-height: calc(1.25em * $number-of-lines);
-    //     padding-bottom: 0 !important;
-    //     margin-bottom: var(--pad-2);
-    //   }
-    // }
   }
   .right {
+    justify-content: flex-start !important;
     row-gap: var(--pad-4) !important;
+  }
+
+  .desktopControls {
+    display: none !important;
+
+    @media (min-width: $tablet) {
+      display: flex !important;
+      justify-content: flex-end !important;
+    }
   }
 }

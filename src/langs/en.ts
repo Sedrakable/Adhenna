@@ -104,7 +104,7 @@ export const enTranslations: Translations = {
     total: "Total",
     noItemsInCart: "No items in cart. Please check Boutique",
     subtotal: "Subtotal",
-    taxes: "Taxes",
+    taxes: "Taxes (14.975%)",
     shipping: "Shipping",
   },
   select: {

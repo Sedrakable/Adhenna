@@ -10,7 +10,11 @@ import FlexDiv from "../../FlexDiv";
 import { getTranslations } from "@/helpers/langUtils";
 import { useLocale } from "next-intl";
 import { LangType } from "@/i18n/request";
-import { AddressFormData, FormErrorData, looksLikeBot } from "../formTypes";
+import {
+  AddressFormData,
+  FormErrorData,
+  getBotDetectionReason,
+} from "../formTypes";
 import {
   FormSteps,
   FormSubmitButton,
@@ -136,8 +140,9 @@ export const CartForm: FC<CartFormProps> = ({
 
     if (!validateForm()) return;
 
-    if (looksLikeBot(formData)) {
-      console.error("Blocked spam-ish submission");
+    const botReason = getBotDetectionReason(formData);
+    if (botReason) {
+      console.error("Blocked spam-ish submission:", botReason);
       return;
     }
 
@@ -170,7 +175,7 @@ export const CartForm: FC<CartFormProps> = ({
 
   const Steps: ReactNode[] = [
     <Input
-      label="Company"
+      label="Form check"
       type="text"
       value={formData.company || ""}
       onChange={handleInputChange("company")}

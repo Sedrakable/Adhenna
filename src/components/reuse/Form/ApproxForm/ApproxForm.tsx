@@ -8,7 +8,11 @@ import FlexDiv from "../../FlexDiv";
 import { getTranslations } from "@/helpers/langUtils";
 import { useLocale } from "next-intl";
 import { LangType } from "@/i18n/request";
-import { ApproxFormData, FormErrorData, looksLikeBot } from "../formTypes";
+import {
+  ApproxFormData,
+  FormErrorData,
+  getBotDetectionReason,
+} from "../formTypes";
 import {
   FormSteps,
   FormSubmitButton,
@@ -95,8 +99,9 @@ export const ApproxForm: FC<
 
     if (!validateForm()) return;
 
-    if (looksLikeBot(formData)) {
-      console.error("Blocked spam-ish submission");
+    const botReason = getBotDetectionReason(formData);
+    if (botReason) {
+      console.error("Blocked spam-ish submission:", botReason);
       return;
     }
 
@@ -126,7 +131,7 @@ export const ApproxForm: FC<
 
   const Steps: ReactNode[] = [
     <Input
-      label="Company"
+      label="Form check"
       type="text"
       value={formData.company || ""}
       onChange={handleInputChange("company")}

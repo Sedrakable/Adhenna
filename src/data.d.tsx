@@ -211,6 +211,7 @@ export interface IProduct {
   images?: ICustomImage[];
   title: string;
   price: string;
+  originalPrice?: string;
   desc?: string;
   quantityDesc?: string;
   type: "toiles" | "boutique";

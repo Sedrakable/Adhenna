@@ -54,22 +54,34 @@ export interface StepProps {
   number: number | undefined;
 }
 
-export const looksLikeBot = (formData: BaseFormData): boolean => {
+export type BotDetectionReason =
+  | "honeypot_filled"
+  | "invalid_email"
+  | "missing_first_name"
+  | "missing_last_name"
+  | "first_name_too_long"
+  | "last_name_too_long";
+
+export const getBotDetectionReason = (
+  formData: BaseFormData,
+): BotDetectionReason | false => {
   const honeypotFilled =
     typeof formData.company === "string" && formData.company.trim().length > 0;
 
-  if (honeypotFilled) return true;
+  if (honeypotFilled) return "honeypot_filled";
 
   const email = formData.email?.trim() ?? "";
   const firstName = formData.firstName?.trim() ?? "";
   const lastName = formData.lastName?.trim() ?? "";
 
-  const invalidEmail = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const suspiciousName =
-    firstName.length === 0 ||
-    lastName.length === 0 ||
-    firstName.length > 80 ||
-    lastName.length > 80;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "invalid_email";
+  if (firstName.length === 0) return "missing_first_name";
+  if (lastName.length === 0) return "missing_last_name";
+  if (firstName.length > 80) return "first_name_too_long";
+  if (lastName.length > 80) return "last_name_too_long";
 
-  return invalidEmail || suspiciousName;
+  return false;
 };
+
+export const looksLikeBot = (formData: BaseFormData): boolean =>
+  Boolean(getBotDetectionReason(formData));
