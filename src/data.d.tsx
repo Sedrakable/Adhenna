@@ -1,5 +1,5 @@
-// @ts-ignore
-import { ICustomImage } from "./components/reuse/SanityImage/SanityImage";
+import type { ICustomImage } from "./components/reuse/SanityImage/SanityImage";
+import type { ContentBlockValue } from "./components/reuse/ContentBlock/ContentBlock";
 import { CollapsibleProps } from "./components/reuse/Collapsible/Collapsible";
 
 export interface IFancyText {
@@ -120,7 +120,7 @@ export interface IArticle {
   desc: any;
   date: string;
   type: IArticleType;
-  content: IBlock[];
+  content: ContentBlockValue[];
 }
 
 export const articleTypeArray = ["tattoo", "henna", "jagua", "toile"] as const;
@@ -211,6 +211,7 @@ export interface IProduct {
   images?: ICustomImage[];
   title: string;
   price: string;
+  originalPrice?: string;
   desc?: string;
   quantityDesc?: string;
   type: "toiles" | "boutique";

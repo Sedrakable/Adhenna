@@ -10,9 +10,8 @@ import { useLocale } from "next-intl";
 import { LangType } from "@/i18n/request";
 import {
   ApproxFormData,
-  EncodedFileType,
   FormErrorData,
-  looksLikeBot,
+  getBotDetectionReason,
 } from "../formTypes";
 import {
   FormSteps,
@@ -22,6 +21,13 @@ import {
 } from "../Form";
 import { Slider } from "../Slider/Slider";
 import { UploadButton } from "../UploadButton/UploadButton";
+import { encodeFiles } from "../formFiles";
+import { useFormSubmission } from "../useFormSubmission";
+import {
+  hasFormErrors,
+  validateEmailField,
+  validateRequiredFields,
+} from "../formValidation";
 
 interface ApproxFormProps extends FormTitleProps {
   plan: string;
@@ -44,10 +50,13 @@ export const ApproxForm: FC<
   });
 
   const [errors, setErrors] = useState<FormErrorData>({});
-  const [submit, setSubmit] = useState<string | false>(false);
-  const [loading, setLoading] = useState(false); // New loading state
+  const { loading, submitForm, submitText } = useFormSubmission(
+    translations,
+    () => onSubmit(true),
+  );
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
 
   const handleInputChange = (field: keyof ApproxFormData) => (
     value: string,
@@ -69,33 +78,14 @@ export const ApproxForm: FC<
       setErrors((prev) => ({ ...prev, length: false }));
     }
   };
-  const handleFileUpload = (files: File[]) => {
+  const handleFileUpload = async (files: File[]) => {
     if (files.length > 0) {
-      const filePromises: Promise<EncodedFileType>[] = files.map((file) => {
-        return new Promise<{ name: string; type: string; data: string }>(
-          (resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              const fileData = (event.target?.result as string)?.split(",")[1];
-              resolve({
-                name: file.name,
-                type: file.type,
-                data: fileData,
-              });
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          },
-        );
-      });
-
-      Promise.all(filePromises).then((encodedFiles) => {
-        setFormData((prev: ApproxFormData) => ({
-          ...prev,
-          uploads: encodedFiles,
-        }));
-        setUploadedFiles(files);
-      });
+      const encodedFiles = await encodeFiles(files);
+      setFormData((prev: ApproxFormData) => ({
+        ...prev,
+        uploads: encodedFiles,
+      }));
+      setUploadedFiles(files);
     } else {
       setFormData((prev: ApproxFormData) => ({ ...prev, uploads: [] }));
       setUploadedFiles([]);
@@ -105,44 +95,23 @@ export const ApproxForm: FC<
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (uploadingFiles) return;
+
     if (!validateForm()) return;
 
-    if (looksLikeBot(formData)) {
-      console.error("Blocked spam-ish submission");
+    const botReason = getBotDetectionReason(formData);
+    if (botReason) {
+      console.error("Blocked spam-ish submission:", botReason);
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/sendApproxFormEmail", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ formData, plan, locale }),
-      });
-
-      if (response.ok) {
-        setSubmit(translations.form.general.emailSent);
-        onSubmit(true);
-
-        // Add success handling (e.g., show success message, reset form)
-      } else {
-        console.error("Failed to send flash request", response);
-        setSubmit(translations.form.general.emailNotSent);
-        // Add error handling (e.g., show error message)
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setSubmit(translations.form.general.emailNotSent);
-    } finally {
-      setLoading(false); // Set loading to false after submission
-    }
+    await submitForm({
+      endpoint: "/api/sendApproxFormEmail",
+      body: { formData, plan, locale },
+    });
   };
 
   const validateForm = (): boolean => {
-    const newErrors: FormErrorData = {};
     const requiredFields: (keyof ApproxFormData)[] = [
       "firstName",
       "lastName",
@@ -152,24 +121,17 @@ export const ApproxForm: FC<
       "length",
     ];
 
-    requiredFields.forEach((key) => {
-      if (!formData[key]) {
-        newErrors[key] = true;
-      }
-    });
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
-      newErrors.email = true;
-    }
-
+    const newErrors = validateEmailField(
+      validateRequiredFields(formData, requiredFields),
+      formData.email,
+    );
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return !hasFormErrors(newErrors);
   };
 
   const Steps: ReactNode[] = [
     <Input
-      label="Company"
+      label="Form check"
       type="text"
       value={formData.company || ""}
       onChange={handleInputChange("company")}
@@ -242,7 +204,8 @@ export const ApproxForm: FC<
       accept="image/*"
       uploadedFiles={uploadedFiles}
       isInvalid={errors.upload}
-      maxFiles={3}
+      maxFiles={8}
+      onProcessingChange={setUploadingFiles}
     />,
   ];
 
@@ -251,10 +214,10 @@ export const ApproxForm: FC<
       <form onSubmit={handleSubmit} className={styles.form}>
         <FormSteps steps={Steps} />
         <FormSubmitButton
-          submitText={submit}
-          isValid={Object.keys(errors).length === 0}
+          submitText={submitText}
+          isValid={!hasFormErrors(errors)}
           translations={translations}
-          loading={loading}
+          loading={loading || uploadingFiles}
         />
       </form>
     </FlexDiv>

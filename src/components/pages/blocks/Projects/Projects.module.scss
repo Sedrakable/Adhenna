@@ -111,6 +111,13 @@
       transform: scale(1.02);
     }
 
+    .reserveLabel {
+      position: absolute;
+      top: var(--pad-3);
+      right: var(--pad-3);
+      z-index: 2;
+    }
+
     &.flash {
       .image {
         background: var(--cream-white);

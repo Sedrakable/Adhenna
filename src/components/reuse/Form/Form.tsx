@@ -99,13 +99,17 @@ export const FormSubmitButton: FC<{
   isValid: boolean;
   submitText: string | false;
   translations: Translations;
-  loading: boolean;
-}> = ({ isValid, translations, submitText, loading = true }) => {
+  loading?: boolean;
+}> = ({ isValid, translations, submitText, loading = false }) => {
   const { isMobile } = useWindowResize();
 
   return (
-    <FlexDiv className={styles.submitWrapper} gapArray={[2]}>
-      <Button type="submit" variant="primary">
+    <FlexDiv
+      className={styles.submitWrapper}
+      gapArray={[2]}
+      padding={{ top: [5] }}
+    >
+      <Button type="submit" variant="primary" disabled={loading}>
         {translations.buttons.submit}
       </Button>
       {!isValid && (

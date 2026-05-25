@@ -15,7 +15,6 @@ interface sitemapProductsQueryType extends SanityDocument {
 
 async function getProductData() {
   const query = sitemapProductsQuery();
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const data: sitemapProductsQueryType[] = await fetchPageData(query);
   return data;
 }
@@ -26,7 +25,6 @@ interface sitemapArticlesQueryType extends SanityDocument {
 
 async function getArticleData() {
   const query = sitemapArticlesQuery();
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const data: sitemapArticlesQueryType[] = await fetchPageData(query);
   return data;
 }
@@ -37,7 +35,6 @@ interface sitemapProjectsQueryType extends SanityDocument {
 
 async function getProjectData(type: string) {
   const query = sitemapProjectsQuery(type);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const data: sitemapProjectsQueryType[] = await fetchPageData(query);
   return data;
 }
@@ -62,6 +59,7 @@ const serviceUrls = [
 
 // Combine all static and subpath URLs into a single flat array
 const allUrls = [...baseUrls, ...courseUrls, ...serviceUrls];
+const SITE_URL = process.env.BASE_NAME || "https://www.adhennatattoo.com";
 const locales = ["fr", "en"];
 
 // Dynamic routes for portfolio
@@ -70,21 +68,22 @@ const dynamicRouteProjects = ["tattoo", "henna", "flash", "toiles"];
 // Generate static entries for portfolio routes
 const generateStaticEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
   allUrls.map((baseUrl) => {
-    const url = `https://adhennatattoo.com/${locale}${baseUrl}`;
+    const url = `${SITE_URL}/${locale}${baseUrl}`;
 
     return {
       url,
       lastModified: new Date().toISOString(),
       changeFrequency: "monthly",
-      priority: 1,
+      priority: locale === "fr" ? 1 : 0.8,
       alternates: {
         languages: {
-          fr: `https://adhennatattoo.com/fr${baseUrl}`,
-          en: `https://adhennatattoo.com/en${baseUrl}`,
+          fr: `${SITE_URL}/fr${baseUrl}`,
+          en: `${SITE_URL}/en${baseUrl}`,
+          "x-default": `${SITE_URL}/fr${baseUrl}`,
         },
       },
     };
-  })
+  }),
 );
 
 // Generate dynamic entries for portfolio routes
@@ -92,26 +91,27 @@ const generatePortfolioEntries = async (): Promise<MetadataRoute.Sitemap> => {
   const projectEntries: Promise<MetadataRoute.Sitemap> = Promise.all(
     locales.flatMap((locale) =>
       dynamicRouteProjects.map(async (projectType) => {
-        const url = `https://adhennatattoo.com/${locale}/portfolio/${projectType}`;
+        const url = `${SITE_URL}/${locale}/portfolio/${projectType}`;
         const projectData = await getProjectData(projectType);
 
         return {
           url,
           lastModified: new Date().toISOString(),
           changeFrequency: "weekly",
-          priority: 0.6,
+          priority: locale === "fr" ? 0.6 : 0.5,
           images: projectData.map(
-            (project) => urlFor(project.image.image).url() || ""
+            (project) => urlFor(project.image.image).url() || "",
           ),
           alternates: {
             languages: {
-              fr: `https://adhennatattoo.com/fr/portfolio/${projectType}`,
-              en: `https://adhennatattoo.com/en/portfolio/${projectType}`,
+              fr: `${SITE_URL}/fr/portfolio/${projectType}`,
+              en: `${SITE_URL}/en/portfolio/${projectType}`,
+              "x-default": `${SITE_URL}/fr/portfolio/${projectType}`,
             },
           },
         };
-      })
-    )
+      }),
+    ),
   );
 
   return projectEntries;
@@ -123,37 +123,39 @@ const generateDynamicEntries = async (): Promise<MetadataRoute.Sitemap> => {
   const productEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
     productData.map((product: sitemapProductsQueryType) => {
       return {
-        url: `https://adhennatattoo.com/${locale}/boutique/${product.path}`,
+        url: `${SITE_URL}/${locale}/boutique/${product.path}`,
         lastModified: product._updatedAt || new Date().toISOString(),
         changeFrequency: "weekly",
-        priority: 0.7,
+        priority: locale === "fr" ? 0.7 : 0.6,
         images: product.images.map((image) => urlFor(image.image).url()),
         alternates: {
           languages: {
-            fr: `https://adhennatattoo.com/fr/boutique/${product.path}`,
-            en: `https://adhennatattoo.com/en/boutique/${product.path}`,
+            fr: `${SITE_URL}/fr/boutique/${product.path}`,
+            en: `${SITE_URL}/en/boutique/${product.path}`,
+            "x-default": `${SITE_URL}/fr/boutique/${product.path}`,
           },
         },
       };
-    })
+    }),
   );
 
   const articleEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
     articleData.map((article: sitemapArticlesQueryType) => {
       return {
-        url: `https://adhennatattoo.com/${locale}/blog/${article.path}`,
+        url: `${SITE_URL}/${locale}/blog/${article.path}`,
         lastModified: article._updatedAt || new Date().toISOString(),
         changeFrequency: "weekly",
-        priority: 0.6,
+        priority: locale === "fr" ? 0.6 : 0.5,
         images: [urlFor(article.customImage.image).url()],
         alternates: {
           languages: {
-            fr: `https://adhennatattoo.com/fr/blog/${article.path}`,
-            en: `https://adhennatattoo.com/en/blog/${article.path}`,
+            fr: `${SITE_URL}/fr/blog/${article.path}`,
+            en: `${SITE_URL}/en/blog/${article.path}`,
+            "x-default": `${SITE_URL}/fr/blog/${article.path}`,
           },
         },
       };
-    })
+    }),
   );
 
   return [...articleEntries, ...productEntries];

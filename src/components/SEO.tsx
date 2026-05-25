@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { LangType } from "@/i18n/request";
-import dynamic from "next/dynamic";
 import { ISeo } from "@/data.d";
 
 interface SEOProps extends ISeo {
@@ -8,6 +7,12 @@ interface SEOProps extends ISeo {
   path: string;
   crawl?: boolean;
 }
+
+const SITE_URL = process.env.BASE_NAME || "https://www.adhennatattoo.com";
+const localeMap: Record<LangType, string> = {
+  fr: "fr_CA",
+  en: "en_CA",
+};
 
 export const setMetadata = ({
   locale,
@@ -24,11 +29,12 @@ export const setMetadata = ({
       follow: crawl,
     },
     openGraph: {
-      url: `https://www.adhennatattoo.com/${locale}${path}`,
+      url: `${SITE_URL}/${locale}${path}`,
       type: "website",
       title: metaTitle,
       description: metaDesc,
-      locale: locale,
+      locale: localeMap[locale],
+      alternateLocale: [locale === "fr" ? localeMap.en : localeMap.fr],
       siteName: "ADHENNA TATTOO",
       images: [
         {
@@ -54,11 +60,11 @@ export const setMetadata = ({
       ],
     },
     alternates: {
-      canonical: `https://www.adhennatattoo.com/${locale}${path}`,
+      canonical: `${SITE_URL}/${locale}${path}`,
       languages: {
-        en: `https://www.adhennatattoo.com/en${path}`,
-        fr: `https://www.adhennatattoo.com/fr${path}`,
-        "x-default": `https://www.adhennatattoo.com/fr${path}`,
+        fr: `${SITE_URL}/fr${path}`,
+        en: `${SITE_URL}/en${path}`,
+        "x-default": `${SITE_URL}/fr${path}`,
       },
     },
   };

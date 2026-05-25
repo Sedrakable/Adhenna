@@ -75,6 +75,11 @@ describe("Email Templates", () => {
   });
 
   test("cart template includes product and shipping info safely", () => {
+    const previousGstNumber = process.env.EMAIL_GST_NUMBER;
+    const previousQstNumber = process.env.EMAIL_QST_NUMBER;
+    process.env.EMAIL_GST_NUMBER = "123456789 RT0001";
+    process.env.EMAIL_QST_NUMBER = "1234567890 TQ0001";
+
     const formData: AddressFormData = {
       firstName: "Marc",
       lastName: "Roy",
@@ -94,18 +99,42 @@ describe("Email Templates", () => {
       {
         quantity: 2,
         product: {
+          path: "tattoo-balm",
           title: "Tattoo Balm",
-          type: "Care",
+          type: "boutique",
           price: "15",
+          originalPrice: "18",
         },
-      } as ICartProduct,
+      },
     ];
 
-    const html = getCartClientTemplate(formData, cart, 0, "en");
+    try {
+      const html = getCartClientTemplate(formData, cart, 0, "en", "ADH-TEST");
 
-    expect(html).toContain("Tattoo Balm");
-    expect(html).toContain("123 Main St");
-    expect(html).toContain("&lt;b&gt;Leave outside&lt;/b&gt;");
-    expect(html).not.toContain("<b>Leave outside</b>");
+      expect(html).toContain("Invoice / Receipt");
+      expect(html).toContain("ADH-TEST");
+      expect(html).toContain("Tattoo Balm");
+      expect(html).toContain("15.00 $");
+      expect(html).toContain("GST/TPS 5%");
+      expect(html).toContain("QST/TVQ 9.975%");
+      expect(html).toContain("GST/TPS no.: 123456789 RT0001");
+      expect(html).toContain("QST/TVQ no.: 1234567890 TQ0001");
+      expect(html).not.toContain("18.00 $");
+      expect(html).toContain("123 Main St");
+      expect(html).toContain("&lt;b&gt;Leave outside&lt;/b&gt;");
+      expect(html).not.toContain("<b>Leave outside</b>");
+    } finally {
+      if (previousGstNumber) {
+        process.env.EMAIL_GST_NUMBER = previousGstNumber;
+      } else {
+        delete process.env.EMAIL_GST_NUMBER;
+      }
+
+      if (previousQstNumber) {
+        process.env.EMAIL_QST_NUMBER = previousQstNumber;
+      } else {
+        delete process.env.EMAIL_QST_NUMBER;
+      }
+    }
   });
 });

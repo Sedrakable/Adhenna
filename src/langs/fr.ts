@@ -105,7 +105,7 @@ export const frTranslations: Translations = {
     noItemsInCart: "Panier vide. Ajoutez des articles pour continuer",
     total: "Total",
     subtotal: "Sous-total",
-    taxes: "Taxes (15%)",
+    taxes: "Taxes (14.975%)",
     shipping: "Livraison",
   },
   select: {

@@ -9,6 +9,7 @@ import { SizeType, TextWrapper } from "../containers/TextWrapper/TextWrapper";
 import { Paragraph } from "../Paragraph/Paragraph";
 import { Icon } from "../Icon";
 import { PortableTextContent } from "../Paragraph/PortableTextContent";
+import { useWindowResize } from "@/helpers/useWindowResize";
 
 export interface CollapsibleProps {
   title?: string;
@@ -17,22 +18,25 @@ export interface CollapsibleProps {
     answer: string;
   }[];
   variant?: SizeType;
+  borderBottom?: boolean;
 }
 export const Collapsible: React.FC<CollapsibleProps> = ({
   title,
   questions,
   variant = "big",
+  borderBottom = true,
 }) => {
   const [openQuestions, setOpenQuestions] = useState<number[]>([]);
+  const { isMobile } = useWindowResize();
 
   const toggleQuestion = (index: number) => {
     setOpenQuestions((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
     );
   };
 
   return (
-    <TextWrapper version={3} variant={variant}>
+    <TextWrapper version={borderBottom ? 3 : 4} variant={variant}>
       <FlexDiv
         flex={{ direction: "column", x: "flex-start", y: "flex-start" }}
         width100
@@ -70,7 +74,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
                   icon={openQuestions.includes(index) ? "minus" : "plus"}
                   size="small"
                   className={cn(
-                    openQuestions.includes(index) ? styles.minus : styles.plus
+                    openQuestions.includes(index) ? styles.minus : styles.plus,
                   )}
                   key={openQuestions.includes(index) ? "minus" : "plus"}
                 />
@@ -87,7 +91,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
                   gapArray={[2]}
                 >
                   <PortableTextContent
-                    level="regular"
+                    level={isMobile ? "small" : "regular"}
                     value={q.answer}
                     color="burgundy"
                     weight={400}

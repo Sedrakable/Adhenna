@@ -14,7 +14,7 @@ export type SizeType = "small" | "big";
 
 interface TextWrapperProps {
   children?: ReactNode;
-  version?: 1 | 2 | 3;
+  version?: 1 | 2 | 3 | 4;
   backgroundImage?: ICustomImage;
   variant?: SizeType;
   animate?: boolean;

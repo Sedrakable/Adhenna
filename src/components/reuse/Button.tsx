@@ -115,6 +115,7 @@ export const Button: FC<PropsWithChildren<
         href={href}
         target={target || "_blank"}
         rel="noopener noreferrer"
+        onClick={(e) => handleClick(e as any)}
       >
         {buttonContent}
       </a>
@@ -124,7 +125,7 @@ export const Button: FC<PropsWithChildren<
       <button
         {...buttonProps}
         onClick={handleClick}
-        // disabled={disabled}
+        disabled={disabled}
         {...(props as ButtonHTMLAttributes<HTMLButtonElement>)}
       >
         {buttonContent}

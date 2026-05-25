@@ -13,7 +13,7 @@ import {
   FormSubmitMessage,
 } from "@/components/reuse/Form/Form";
 import { LangType } from "@/i18n/request";
-import { motion, useAnimationControls, Variants } from "motion/react";
+import { motion } from "motion/react";
 import { getTranslations } from "@/helpers/langUtils";
 
 export interface ApproxProps {
@@ -27,28 +27,16 @@ export const Approx: FC<ApproxProps> = ({ form, images, plan, locale }) => {
   const trans = getTranslations(locale);
   const [submitted, setSubmitted] = useState<boolean>(false);
   const messageRef = useRef<HTMLDivElement>(null);
-  const controls = useAnimationControls();
-
-  // Animation variants for FormSubmitMessage
-  const variants: Variants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: "easeOut" },
-    },
-  };
 
   // Scroll and animate when submitted changes to true
   useEffect(() => {
     if (submitted && messageRef.current) {
-      controls.start("visible");
       messageRef.current.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
     }
-  }, [submitted, controls]);
+  }, [submitted]);
 
   return (
     <FlexDiv
@@ -60,9 +48,9 @@ export const Approx: FC<ApproxProps> = ({ form, images, plan, locale }) => {
       {submitted ? (
         <motion.div
           ref={messageRef}
-          initial="hidden"
-          animate={controls}
-          variants={variants}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
         >
           <FormSubmitMessage locale={locale} translations={trans} />
         </motion.div>

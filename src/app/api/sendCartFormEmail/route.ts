@@ -16,6 +16,14 @@ interface RequestData {
   locale: LangType;
 }
 
+const createOrderNumber = (): string => {
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10).replace(/-/g, "");
+  const suffix = now.getTime().toString().slice(-6);
+
+  return `ADH-${date}-${suffix}`;
+};
+
 export async function POST(request: Request) {
   try {
     const {
@@ -27,7 +35,7 @@ export async function POST(request: Request) {
 
     if (!["en", "fr"].includes(locale)) {
       return NextResponse.json(
-        { error: "Invalid locale. Must be 'en' or 'fr'" },
+        { ok: false, error: "Invalid locale. Must be 'en' or 'fr'" },
         { status: 400 },
       );
     }
@@ -39,28 +47,49 @@ export async function POST(request: Request) {
     const transporter = createEmailTransporter();
     const t = translations.cart[locale];
     const tBusiness = translations.business.cart;
+    const orderNumber = createOrderNumber();
 
     await Promise.all([
       transporter.sendMail({
         from: `"Adhenna Tattoo" <${process.env.EMAIL_BUSINESS}>`,
         to: formData.email,
         subject: t.subject,
-        html: getCartClientTemplate(formData, cart, deliveryPrice, locale),
+        html: getCartClientTemplate(
+          formData,
+          cart,
+          deliveryPrice,
+          locale,
+          orderNumber,
+        ),
       }),
       transporter.sendMail({
         from: `"Adhenna Tattoo" <${process.env.EMAIL_BUSINESS}>`,
         to: process.env.EMAIL_BUSINESS,
-        subject: `${tBusiness.title} - ${formData.firstName} ${formData.lastName}`,
-        html: getCartBusinessTemplate(formData, cart, deliveryPrice, locale),
+        subject: tBusiness.subject(
+          formData.firstName,
+          formData.lastName,
+          locale,
+        ),
+        html: getCartBusinessTemplate(
+          formData,
+          cart,
+          deliveryPrice,
+          locale,
+          orderNumber,
+        ),
       }),
     ]);
 
-    return NextResponse.json({ message: "Emails sent successfully" });
+    return NextResponse.json({ ok: true, message: "Emails sent successfully" });
   } catch (error) {
     console.error("Server error:", error);
 
     return NextResponse.json(
-      { error: "Failed to send emails", details: (error as Error).message },
+      {
+        ok: false,
+        error: "Failed to send emails",
+        details: (error as Error).message,
+      },
       { status: 500 },
     );
   }

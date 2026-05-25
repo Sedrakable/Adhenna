@@ -57,10 +57,6 @@
         position: absolute;
         bottom: 0;
         transform: translateY(100%);
-
-        border-radius: var(--border-radius);
-        background: hsl(from var(--cream-white) h s l / 0.75);
-        backdrop-filter: var(--blur);
       }
     }
     .image {

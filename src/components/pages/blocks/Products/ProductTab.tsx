@@ -13,6 +13,7 @@ import FlexDiv from "@/components/reuse/FlexDiv";
 import { Paragraph } from "@/components/reuse/Paragraph/Paragraph";
 import { Pill } from "@/components/reuse/Pill/Pill";
 import { SanityImage } from "@/components/reuse/SanityImage/SanityImage";
+import { useWindowResize } from "@/helpers/useWindowResize";
 
 interface ProductTabProps extends ICartProduct {
   // eslint-disable-next-line no-unused-vars
@@ -24,27 +25,48 @@ export const ProductTab: React.FC<ProductTabProps> = ({
   quantity,
   updateCart,
 }) => {
-  const { images, title, price, desc } = product;
+  const { isMobile } = useWindowResize();
+  const { images, title, price, originalPrice } = product;
+  const productPath = product.path;
+  const isBoutique = product.type === "boutique";
   const [pillValue, setPillValue] = useState<number>(quantity);
 
   const handleRemoveProduct = useCallback(() => {
     const cartProducts =
       getFromLocalStorage<ICartProduct[]>(CART_STORAGE_KEY) || [];
     const updatedCartProducts = cartProducts.filter(
-      (item) => item.product.path !== product.path
+      (item) => item.product.path !== productPath,
     );
     updateCart(updatedCartProducts);
-  }, [product.path, updateCart]);
+  }, [productPath, updateCart]);
 
   const handlePillValueChange = (value: number) => {
     setPillValue(value);
     const cartProducts =
       getFromLocalStorage<ICartProduct[]>(CART_STORAGE_KEY) || [];
     const updatedCartProducts = cartProducts.map((item) =>
-      item.product.path === product.path ? { ...item, quantity: value } : item
+      item.product.path === productPath ? { ...item, quantity: value } : item,
     );
     updateCart(updatedCartProducts);
   };
+
+  const Controls = ({ small = false }: { small?: boolean }) => (
+    <>
+      {isBoutique && (
+        <Pill
+          initialValue={pillValue}
+          version="2"
+          onChange={handlePillValueChange}
+        />
+      )}
+      <Button
+        variant="white"
+        small={small}
+        onClick={handleRemoveProduct}
+        iconProps={{ icon: "trash", size: small ? "small" : undefined }}
+      />
+    </>
+  );
 
   return (
     <FlexDiv
@@ -72,27 +94,50 @@ export const ProductTab: React.FC<ProductTabProps> = ({
           flex={{ direction: "column", x: "flex-start" }}
           className={styles.text}
         >
-          <Paragraph level="big" color="dark-burgundy" weight={500}>
+          <Paragraph
+            level="big"
+            color="dark-burgundy"
+            weight={500}
+            paddingBottomArray={[2, 1]}
+          >
             {title}
           </Paragraph>
-          <Paragraph level="regular" weight={500} color="burgundy">
-            ${price}
-          </Paragraph>
+          <FlexDiv
+            className={styles.priceWrapper}
+            gapArray={[2]}
+            padding={{ bottom: [2] }}
+          >
+            <Paragraph level="regular" weight={500} color="burgundy">
+              {price}
+            </Paragraph>
+            {originalPrice && (
+              <Paragraph
+                level="regular"
+                weight={500}
+                color="burgundy"
+                className={styles.originalPrice}
+              >
+                {`(${originalPrice})`}
+              </Paragraph>
+            )}
+          </FlexDiv>
+          {isMobile && (
+            <FlexDiv
+              flex={{ x: "flex-start" }}
+              className={styles.right}
+              gapArray={[4]}
+            >
+              <Controls small />
+            </FlexDiv>
+          )}
         </FlexDiv>
       </FlexDiv>
-      <FlexDiv flex={{ x: "flex-end" }} className={styles.right} gapArray={[4]}>
-        {product.type === "boutique" && (
-          <Pill
-            initialValue={pillValue}
-            version="2"
-            onChange={handlePillValueChange}
-          />
-        )}
-        <Button
-          variant="white"
-          onClick={handleRemoveProduct}
-          iconProps={{ icon: "trash" }}
-        />
+      <FlexDiv
+        flex={{ x: "flex-end" }}
+        className={cn(styles.right, styles.desktopControls)}
+        gapArray={[4]}
+      >
+        <Controls />
       </FlexDiv>
     </FlexDiv>
   );

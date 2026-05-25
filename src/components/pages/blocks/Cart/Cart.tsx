@@ -33,7 +33,7 @@ export const Cart: FC<CartProps> = (props) => {
 
   const [deliveryPrice, setDeliveryPrice] = useState<number>(0);
   const [cart, setCart] = useState<ICartProduct[]>(
-    () => getFromLocalStorage<ICartProduct[]>(CART_STORAGE_KEY) || []
+    () => getFromLocalStorage<ICartProduct[]>(CART_STORAGE_KEY) || [],
   );
 
   const updateCart = useCallback((newCart: ICartProduct[]) => {
@@ -49,7 +49,7 @@ export const Cart: FC<CartProps> = (props) => {
 
   // Calculate totals
   const totalWithDelivery = subTotalPrice + deliveryPrice;
-  const taxRate = 0.15; // example tax rate, adjust as needed
+  const taxRate = 0.14975; // example tax rate, adjust as needed
   const taxes = totalWithDelivery * taxRate;
   const grandTotalPrice = totalWithDelivery + taxes;
 
@@ -86,7 +86,7 @@ export const Cart: FC<CartProps> = (props) => {
       flex={{ direction: "column" }}
     >
       <FlexDiv
-        gapArray={[7, 5, 5, 6]}
+        gapArray={[4, 5, 5, 6]}
         width100
         flex={{ direction: "column", y: "flex-start" }}
       >

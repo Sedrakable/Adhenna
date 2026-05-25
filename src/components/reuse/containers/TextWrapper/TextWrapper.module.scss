@@ -72,6 +72,18 @@
   backdrop-filter: blur(var(--pad-1));
 }
 
+.version3 {
+  border: var(--pad-1) solid var(--light-burgundy);
+  border-width: var(--pad-1) 0;
+  backdrop-filter: blur(var(--pad-1));
+}
+
+.version4 {
+  border-top: var(--pad-1) solid var(--light-burgundy);
+  border-width: var(--pad-1) 0;
+  backdrop-filter: blur(var(--pad-1));
+}
+
 .starWrapper1 {
   position: absolute;
   top: -10px;

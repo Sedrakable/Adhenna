@@ -21,7 +21,15 @@ import { LangType } from "@/i18n/request";
 import { useCart } from "../Cart/useCart";
 
 export const ProductModal: React.FC<IProduct> = (props) => {
-  const { images, title, desc, quantityDesc, collapsible, price } = props;
+  const {
+    images,
+    title,
+    desc,
+    quantityDesc,
+    collapsible,
+    price,
+    originalPrice,
+  } = props;
   const locale = useLocale() as LangType;
   const translations = getTranslations(locale);
   const [pillValue, setPillValue] = useState<number>(1);
@@ -40,7 +48,7 @@ export const ProductModal: React.FC<IProduct> = (props) => {
           pillValue > 1
             ? translations.cart.itemsAddedToCart
             : translations.cart.itemAddedToCart
-        }`
+        }`,
       );
     }
   };
@@ -86,9 +94,20 @@ export const ProductModal: React.FC<IProduct> = (props) => {
             {desc}
           </Paragraph>
           <FlexDiv className={styles.textWrapper} gapArray={[3]}>
-            <Paragraph {...paragraphProps} color="dark-burgundy">
-              {price}
-            </Paragraph>
+            <FlexDiv className={styles.priceWrapper} gapArray={[3]}>
+              <Paragraph {...paragraphProps} color="dark-burgundy">
+                {price}
+              </Paragraph>
+              {originalPrice && (
+                <Paragraph
+                  {...paragraphProps}
+                  color="burgundy"
+                  className={styles.originalPrice}
+                >
+                  {`(${originalPrice})`}
+                </Paragraph>
+              )}
+            </FlexDiv>
             {quantityDesc && (
               <>
                 <Paragraph {...paragraphProps} color="burgundy">

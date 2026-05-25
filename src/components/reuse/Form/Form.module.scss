@@ -1,45 +1,19 @@
 @use "@/styles/mixins.scss" as *;
 
-@mixin vars() {
-  --button-margin-left: 0;
-
-  @media (min-width: $tablet) {
-    --button-margin-left: 41px;
-  }
-  @media (min-width: $laptop) {
-    --button-margin-left: 40px;
-  }
-
-  @media (min-width: $desktop) {
-    --button-margin-left: 46px;
-  }
-}
-
 .form {
-  @include vars;
   @include flexColumn(flex-start, flex-start);
 
-  gap: var(--pad-5);
+  // gap: var(--pad-5);
   width: 100%;
   padding-bottom: var(--pad-5);
-
-  button {
-    margin-left: var(--button-margin-left);
-  }
 
   .submitWrapper {
     position: relative;
     width: 100%;
     @media (min-width: $tablet) {
       width: auto;
-      padding-left: var(--button-margin-left);
     }
   }
-}
-
-.formTitles {
-  @include vars;
-  padding-left: var(--button-margin-left) !important;
 }
 
 .step {

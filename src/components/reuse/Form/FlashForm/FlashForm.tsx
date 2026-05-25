@@ -15,8 +15,18 @@ import {
   FormSubmitMessage,
   FormSteps,
 } from "../Form";
-import { FlashFormData, FormErrorData, looksLikeBot } from "../formTypes";
+import {
+  FlashFormData,
+  FormErrorData,
+  getBotDetectionReason,
+} from "../formTypes";
 import FlexDiv from "../../FlexDiv";
+import { useFormSubmission } from "../useFormSubmission";
+import {
+  hasFormErrors,
+  validateEmailField,
+  validateRequiredFields,
+} from "../formValidation";
 
 export interface FlashFormProps {
   flashFormData?: FormTitleProps;
@@ -49,8 +59,8 @@ export const FlashForm: FC<FlashFormProps> = ({
   });
 
   const [errors, setErrors] = useState<FormErrorData>({});
-  const [submit, setSubmit] = useState<string | false>(false);
-  const [loading, setLoading] = useState(false); // New loading state
+  const { loading, submitted, submitForm, submitText } =
+    useFormSubmission(translations);
 
   const handleInputChange = (field: keyof FlashFormData) => (value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -60,7 +70,6 @@ export const FlashForm: FC<FlashFormProps> = ({
   };
 
   const validateForm = (): boolean => {
-    const newErrors: FormErrorData = {};
     const requiredFields: (keyof FlashFormData)[] = [
       "firstName",
       "lastName",
@@ -70,19 +79,12 @@ export const FlashForm: FC<FlashFormProps> = ({
       "availabilities",
     ];
 
-    requiredFields.forEach((field) => {
-      if (!formData[field]) {
-        newErrors[field] = true;
-      }
-    });
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
-      newErrors.email = true;
-    }
-
+    const newErrors = validateEmailField(
+      validateRequiredFields(formData, requiredFields),
+      formData.email,
+    );
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return !hasFormErrors(newErrors);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,41 +92,21 @@ export const FlashForm: FC<FlashFormProps> = ({
 
     if (!validateForm()) return;
 
-    if (looksLikeBot(formData)) {
-      console.error("Blocked spam-ish submission");
+    const botReason = getBotDetectionReason(formData);
+    if (botReason) {
+      console.error("Blocked spam-ish submission:", botReason);
       return;
     }
 
-    setLoading(true);
-    try {
-      const response = await fetch("/api/sendFlashFormEmail", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ formData, currentUrl, locale }),
-      });
-
-      if (response.ok) {
-        setSubmit(translations.form.general.emailSent);
-        // Add success handling (e.g., show success message, reset form)
-      } else {
-        console.error("Failed to send flash request", response);
-        setSubmit(translations.form.general.emailNotSent);
-        // Add error handling (e.g., show error message)
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setSubmit(translations.form.general.emailNotSent);
-      // Add error handling
-    } finally {
-      setLoading(false); // Set loading to false after submission
-    }
+    await submitForm({
+      endpoint: "/api/sendFlashFormEmail",
+      body: { formData, currentUrl, locale },
+    });
   };
 
   const Steps: ReactNode[] = [
     <Input
-      label="Company"
+      label="Form check"
       type="text"
       value={formData.company || ""}
       onChange={handleInputChange("company")}
@@ -185,7 +167,7 @@ export const FlashForm: FC<FlashFormProps> = ({
   ];
   return (
     <FlexDiv width100>
-      {submit === translations.form.general.emailSent ? (
+      {submitted ? (
         <FormSubmitMessage locale={locale} translations={translations} />
       ) : (
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -199,9 +181,9 @@ export const FlashForm: FC<FlashFormProps> = ({
           <FormSteps steps={Steps} />
 
           <FormSubmitButton
-            isValid={Object.keys(errors).length === 0}
+            isValid={!hasFormErrors(errors)}
             translations={translations}
-            submitText={submit}
+            submitText={submitText}
             loading={loading}
           />
         </form>

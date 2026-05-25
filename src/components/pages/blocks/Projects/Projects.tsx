@@ -24,6 +24,7 @@ import { useProjectFilters } from "../../../reuse/Form/CustomFilters/useProjectF
 
 import Link from "next/link";
 import { Paragraph } from "@/components/reuse/Paragraph/Paragraph";
+import { ReserveLabel } from "@/components/reuse/ReserveLabel/ReserveLabel";
 
 interface ProjectProps {
   project: IProject;
@@ -32,6 +33,8 @@ interface ProjectProps {
 }
 
 export const Project: FC<ProjectProps> = ({ project, type }) => {
+  const isAvailableFlash = type === "flash" && !(project as IFlash).reserved;
+
   const renderProjectText = () => {
     if (type === "flash") {
       const flashProject = project as IFlash;
@@ -94,6 +97,13 @@ export const Project: FC<ProjectProps> = ({ project, type }) => {
         quality={50}
         priority
       />
+      {isAvailableFlash && (
+        <ReserveLabel
+          className={styles.reserveLabel}
+          size="regular"
+          color="dark"
+        />
+      )}
 
       {(type === "flash" || type === "toiles") && (
         <FlexDiv className={styles.text}>{renderProjectText()}</FlexDiv>
@@ -147,7 +157,7 @@ export const Projects: React.FC<IWork> = ({ projects, workType }) => {
             </Link>
           ) : (
             <div key={`placeholder-${index}`} className={styles.placeholder} />
-          )
+          ),
         )}
       </FlexDiv>
       <ProjectNavigation locale={locale} translations={translations} />

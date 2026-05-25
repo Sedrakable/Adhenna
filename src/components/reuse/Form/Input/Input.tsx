@@ -36,7 +36,11 @@ export const Input: React.FC<InputProps> = ({
       <input
         type={type}
         value={value}
-        id={type}
+        id={honeyPot ? "form-check-field" : type}
+        name={honeyPot ? "form-check-field" : undefined}
+        autoComplete={honeyPot ? "off" : undefined}
+        tabIndex={honeyPot ? -1 : undefined}
+        aria-hidden={honeyPot || undefined}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={cn(styles.input, josefin.className, {

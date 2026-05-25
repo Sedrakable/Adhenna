@@ -2,24 +2,26 @@ import { Analytics } from "@vercel/analytics/react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Metadata } from "next";
 
+const SITE_URL = process.env.BASE_NAME || "https://www.adhennatattoo.com";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://adhennatattoo.com"),
-  title: "ADHENNA TATTOO | Tattoo & Henna Studio in Montreal",
+  metadataBase: new URL(SITE_URL),
+  title: "ADHENNA TATTOO | Tatouages et henné à Verdun, Montréal",
   description:
-    "Professional tattoo and henna studio in Montreal. Custom tattoos, traditional henna, online and in-person courses. Specializing in unique designs and artistic body art.",
+    "Studio de tatouage et de henné à Verdun, Montréal. Tatouages personnalisés, henné naturel, cours en ligne et en personne.",
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
     type: "website",
-    locale: "en_CA",
-    alternateLocale: ["fr_CA"],
-    url: "https://adhennatattoo.com",
+    locale: "fr_CA",
+    alternateLocale: ["en_CA"],
+    url: `${SITE_URL}/fr`,
     siteName: "ADHENNA TATTOO",
-    title: "ADHENNA TATTOO | Tattoo & Henna Studio in Montreal",
+    title: "ADHENNA TATTOO | Tatouages et henné à Verdun, Montréal",
     description:
-      "Professional tattoo and henna studio in Montreal. Custom tattoos, traditional henna, online and in-person courses.",
+      "Studio de tatouage et de henné à Verdun, Montréal. Tatouages personnalisés, henné naturel, cours en ligne et en personne.",
     images: [
       {
         url: "https://i.imgur.com/XsJPXnO.jpeg",
@@ -32,17 +34,17 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     site: "@AdhennaTattoo",
-    title: "ADHENNA TATTOO | Tattoo & Henna Studio in Montreal",
+    title: "ADHENNA TATTOO | Tatouages et henné à Verdun, Montréal",
     description:
-      "Professional tattoo and henna studio in Montreal. Custom tattoos, traditional henna, and courses.",
+      "Studio de tatouage et de henné à Verdun, Montréal. Tatouages personnalisés, henné naturel et cours.",
     images: ["https://i.imgur.com/XsJPXnO.jpeg"],
   },
   alternates: {
-    canonical: "https://adhennatattoo.com",
+    canonical: `${SITE_URL}/fr`,
     languages: {
-      fr: "https://adhennatattoo.com/fr",
-      en: "https://adhennatattoo.com/en",
-      "x-default": "https://adhennatattoo.com/fr",
+      fr: `${SITE_URL}/fr`,
+      en: `${SITE_URL}/en`,
+      "x-default": `${SITE_URL}/fr`,
     },
   },
 };
