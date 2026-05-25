@@ -18,11 +18,13 @@ export interface CollapsibleProps {
     answer: string;
   }[];
   variant?: SizeType;
+  borderBottom?: boolean;
 }
 export const Collapsible: React.FC<CollapsibleProps> = ({
   title,
   questions,
   variant = "big",
+  borderBottom = true,
 }) => {
   const [openQuestions, setOpenQuestions] = useState<number[]>([]);
   const { isMobile } = useWindowResize();
@@ -34,7 +36,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
   };
 
   return (
-    <TextWrapper version={3} variant={variant}>
+    <TextWrapper version={borderBottom ? 3 : 4} variant={variant}>
       <FlexDiv
         flex={{ direction: "column", x: "flex-start", y: "flex-start" }}
         width100

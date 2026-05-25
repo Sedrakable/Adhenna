@@ -13,7 +13,7 @@ import { LangType } from "@/i18n/request";
 const pageQuery = (
   pageType: string,
   locale: LangType,
-  fields: string
+  fields: string,
 ): string => `
 *[_type == "${pageType}" && lang == '${locale}'][0]{${fields}}
 `;
@@ -82,7 +82,7 @@ export const homePageQuery = (locale: LangType): string =>
   history->,
   reviews,
   bigCTA->
-`
+`,
   );
 
 export const portfolioPageQuery = (locale: LangType): string =>
@@ -101,7 +101,7 @@ export const portfolioPageQuery = (locale: LangType): string =>
     },
   },
   history->,
-`
+`,
   );
 
 export const workPageQuery = (path: string, locale: LangType): string => {
@@ -129,7 +129,7 @@ export const tattooServicePageQuery = (locale: LangType): string =>
   pricePlans[],
   multiDescriptions[],
   collapsible->,
-`
+`,
   );
 
 export const hennaServicePageQuery = (locale: LangType): string =>
@@ -142,7 +142,7 @@ export const hennaServicePageQuery = (locale: LangType): string =>
   tarifText,
   pricePlans[],
   multiDescriptions[],
-`
+`,
   );
 
 export const testTattooServicePageQuery = (locale: LangType): string =>
@@ -156,7 +156,7 @@ export const testTattooServicePageQuery = (locale: LangType): string =>
   desc,
   pricePlans[],
   bigCTA->,
-`
+`,
   );
 
 export const inPersonCoursePageQuery = (locale: LangType): string =>
@@ -173,7 +173,7 @@ export const inPersonCoursePageQuery = (locale: LangType): string =>
   experienceText,
   pricePlans2[],
   bigCTA->
-`
+`,
   );
 
 export const onlineCoursePageQuery = (locale: LangType): string =>
@@ -197,7 +197,7 @@ export const onlineCoursePageQuery = (locale: LangType): string =>
     thumbnail,
   },
   features[],
-`
+`,
   );
 
 export const cartPageQuery = (locale: LangType): string =>
@@ -208,7 +208,7 @@ export const cartPageQuery = (locale: LangType): string =>
   meta,
   hero,
   collapsible->,
-`
+`,
   );
 
 export const formQuery = (slug: string, locale: LangType): string =>
@@ -221,10 +221,9 @@ export const boutiquePageQuery = (locale: LangType): string =>
     `
   meta,
   hero,
-  displays[]->,
   desc,
   products[]->,
-`
+`,
   );
 
 export const productQuery = (locale: LangType, path: string): string => {
@@ -250,7 +249,7 @@ export const blogPageQuery = (locale: LangType): string =>
       customImage
     }
   }
-`
+`,
   );
 
 export const articlesOrderQuery = (locale: LangType): string => {
@@ -275,7 +274,7 @@ export const contactPageQuery = (locale: LangType): string =>
   meta,
   hero,
   collapsible->,
-`
+`,
   );
 
 export const pricePlansQuery = (pageType: string, locale: LangType): string =>
@@ -286,7 +285,7 @@ export const pricePlansQuery = (pageType: string, locale: LangType): string =>
   pricePlans[],
   pricePlans1[],
   pricePlans2[],
-`
+`,
   );
 
 export const legalPageQuery = (locale: LangType, slug: string): string => {
@@ -299,7 +298,7 @@ export const policiesPageQuery = (locale: LangType): string =>
     locale,
     `
   collapsibles[]->,
-`
+`,
   );
 
 export const notFoundPageQuery = (locale: LangType): string =>

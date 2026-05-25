@@ -18,7 +18,6 @@ import { BlockDefinition } from "@sanity/types";
 export interface BoutiquePageProps {
   meta: ISeo;
   hero: IHero;
-  displays: DisplayProps[];
   desc: BlockDefinition[];
   products: IProduct[];
 }
@@ -65,11 +64,11 @@ export default async function BoutiquePage({
         {boutiquePageData?.hero && (
           <Hero {...boutiquePageData?.hero} version={2} />
         )}
-        {boutiquePageData?.displays && (
+        {/* {boutiquePageData?.displays && (
           <Block variant="full-width">
             <Services services={boutiquePageData.displays} />
           </Block>
-        )}
+        )} */}
         <Block variant="default" illustrations>
           {boutiquePageData.desc && (
             <TextWrapper version={3}>

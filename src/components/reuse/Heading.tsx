@@ -1,5 +1,5 @@
 "use client";
-import React, { CSSProperties, ReactElement } from "react";
+import React, { CSSProperties, ReactNode } from "react";
 import styles from "./Heading.module.scss";
 import cn from "classnames";
 import {
@@ -42,7 +42,7 @@ type HeadingAsType = typeof HeadingAsArray[number];
 export type TextWeightType = 300 | 400 | 500;
 
 export interface HeadingProps {
-  children: string | ReactElement;
+  children: string | ReactNode;
   level: HeadingLevelType;
   as: HeadingAsType;
   weight?: TextWeightType;

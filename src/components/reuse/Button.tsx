@@ -115,6 +115,7 @@ export const Button: FC<PropsWithChildren<
         href={href}
         target={target || "_blank"}
         rel="noopener noreferrer"
+        onClick={(e) => handleClick(e as any)}
       >
         {buttonContent}
       </a>

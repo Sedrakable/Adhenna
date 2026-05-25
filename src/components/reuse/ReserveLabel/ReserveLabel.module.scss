@@ -1,0 +1,14 @@
+@use "@/styles/mixins.scss" as *;
+
+.label {
+  border-radius: var(--border-radius);
+  backdrop-filter: var(--blur);
+}
+
+.light {
+  background: hsl(from var(--cream-white) h s l / 0.75);
+}
+
+.dark {
+  background: hsl(from var(--burgundy) h s l / 0.75);
+}

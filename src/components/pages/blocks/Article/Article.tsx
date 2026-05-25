@@ -30,7 +30,7 @@ export const Article: React.FC<IArticle> = ({
   const trans = getTranslations(locale);
   const [pageOrder] = useLocalStorage<IArticle[]>(
     ARTICLES_ORDER_STORAGE_KEY,
-    []
+    [],
   );
 
   // I want to take the article array and turn it into a CTA array
@@ -74,7 +74,7 @@ export const Article: React.FC<IArticle> = ({
             {date}
           </Paragraph>
           <Heading
-            level="3"
+            level="4"
             as="h1"
             color="burgundy"
             weight={400}

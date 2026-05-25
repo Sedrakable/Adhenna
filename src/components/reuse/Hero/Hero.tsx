@@ -3,7 +3,7 @@ import React, { useRef } from "react";
 import styles from "./Hero.module.scss";
 import cn from "classnames";
 import { Paragraph } from "../Paragraph/Paragraph";
-import { IHomeHero } from "../../../data.d";
+import { IExternalLink, IHomeHero } from "../../../data.d";
 import FlexDiv from "../FlexDiv";
 import AdehnnaWordmark from "@/assets/vector/AdhennaWordmark.svg";
 import Image from "next/image";
@@ -24,6 +24,7 @@ export type VersionType = 1 | 2 | 3;
 interface HeroProps extends IHomeHero {
   version?: VersionType;
   fitContent?: boolean;
+  externalCta?: IExternalLink;
 }
 
 const imageQuality: Record<VersionType, number> = {
@@ -41,6 +42,7 @@ export const Hero: React.FC<HeroProps> = ({
   subTitle2,
   desc,
   ctas,
+  externalCta,
   version = 2,
 }) => {
   const { isMobile, isTablet, isMobileOrTablet } = useWindowResize();
@@ -66,7 +68,7 @@ export const Hero: React.FC<HeroProps> = ({
     );
 
   const ctasComp = () =>
-    ctas && (
+    (ctas || externalCta) && (
       <FlexDiv
         gapArray={[4, 4, 4, 4]}
         flex={{
@@ -75,7 +77,7 @@ export const Hero: React.FC<HeroProps> = ({
         }}
         width100
       >
-        {ctas.cta1 && (
+        {ctas?.cta1 && (
           <Button
             variant={version === 3 ? "extra" : "primary"}
             path={`/${locale}${ctas.cta1.link!.join("")}`}
@@ -84,13 +86,23 @@ export const Hero: React.FC<HeroProps> = ({
             {ctas.cta1?.text}
           </Button>
         )}
-        {ctas.cta2 && version !== 3 && (
+        {ctas?.cta2 && version !== 3 && (
           <Button
             variant="transparent"
             path={`/${locale}${ctas.cta2?.link!.join("")}`}
-            onClick={() => sendEvent("Click Hero", ctas.cta1.link!.join(""))}
+            onClick={() => sendEvent("Click Hero", ctas.cta2!.link!.join(""))}
           >
             {ctas.cta2?.text}
+          </Button>
+        )}
+        {externalCta && (
+          <Button
+            variant={ctas?.cta1 ? "transparent" : "primary"}
+            href={externalCta.link}
+            target="_blank"
+            onClick={() => sendEvent("Click Hero", externalCta.link)}
+          >
+            {externalCta.text}
           </Button>
         )}
       </FlexDiv>

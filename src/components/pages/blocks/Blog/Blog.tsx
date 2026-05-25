@@ -23,7 +23,7 @@ export const Blog: React.FC<IBlog> = ({ articles }) => {
 
   const { filteredArticles, filterHandlers, filterOptions } = useArticleFilters(
     articles,
-    translations
+    translations,
   );
 
   useEffect(() => {
@@ -53,27 +53,33 @@ export const Blog: React.FC<IBlog> = ({ articles }) => {
           </FlexDiv>
         </TitleWrapper>
         <Block variant="full-width" illustrations className={styles.block}>
-          {filteredArticles.map((article, index) => {
-            return (
-              <Link
-                href={`/${locale}${LocalPaths.BLOG}/${article.path}`}
-                aria-label={article.path}
-                key={index}
-                onClick={() => sendEvent(`Click Article`, article.path)}
-              >
-                <Display
-                  backgroundImage={article.customImage}
-                  subTitle={article.title}
-                  desc={article.desc}
-                  version="article"
-                  date={`${article.date} | ${
-                    translations.select.articleTypeOptions[article.type]
-                  } `}
-                  reverse={index % 2 === 0}
-                />
-              </Link>
-            );
-          })}
+          <FlexDiv
+            width100
+            flex={{ direction: "column" }}
+            gapArray={[7, 8, 8, 9]}
+          >
+            {filteredArticles.map((article, index) => {
+              return (
+                <Link
+                  href={`/${locale}${LocalPaths.BLOG}/${article.path}`}
+                  aria-label={article.path}
+                  key={index}
+                  onClick={() => sendEvent(`Click Article`, article.path)}
+                >
+                  <Display
+                    backgroundImage={article.customImage}
+                    subTitle={article.title}
+                    desc={article.desc}
+                    version="article"
+                    date={`${article.date} | ${
+                      translations.select.articleTypeOptions[article.type]
+                    } `}
+                    reverse={index % 2 === 0}
+                  />
+                </Link>
+              );
+            })}
+          </FlexDiv>
         </Block>
       </FlexDiv>
     )

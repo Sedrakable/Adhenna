@@ -35,7 +35,7 @@ export const getOnlineCoursePageData = async (locale: LangType) => {
   const onlineCourseQuery = onlineCoursePageQuery(locale);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const onlineCoursePageData: OnlineCoursePageProps = await fetchPageData(
-    onlineCourseQuery
+    onlineCourseQuery,
   );
   console.log("Online Course Page Data:", onlineCoursePageData);
   return onlineCoursePageData;
@@ -48,7 +48,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params; // Await the params
   const onlineCoursePageData: OnlineCoursePageProps = await getOnlineCoursePageData(
-    locale
+    locale,
   );
   const { metaTitle, metaDesc } = onlineCoursePageData?.meta || {};
   const path = LocalPaths.COURSE + LocalPaths.ONLINE;
@@ -75,7 +75,12 @@ export default async function OnlineCoursePage({
     onlineCoursePageData && (
       <>
         {onlineCoursePageData?.hero && (
-          <Hero {...onlineCoursePageData?.hero} version={2} />
+          <Hero
+            {...onlineCoursePageData?.hero}
+            version={2}
+            ctas={{ cta1: onlineCoursePageData?.pricePlan.cta! }}
+            externalCta={onlineCoursePageData?.pricePlan.externalLink}
+          />
         )}
 
         <Block variant="default" illustrations>
