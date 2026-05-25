@@ -1,14 +1,13 @@
 import { MetadataRoute } from "next";
 
+const SITE_URL = process.env.BASE_NAME || "https://www.adhennatattoo.com";
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      // disallow: "/", // No additional disallow rules unless needed
-      allow: ["/fr", "/en", "/sitemap.xml", "/robots.txt"], // Allow crawling only for the French version
+      allow: ["/fr", "/en", "/sitemap.xml", "/robots.txt"],
     },
-    sitemap: `${
-      process.env.BASE_NAME || "https://adhennatattoo.com"
-    }/sitemap.xml`,
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }
