@@ -71,7 +71,7 @@ export const Carousel: FC<ICarouselProps> = ({ data, cta }) => {
     <FlexDiv
       flex={{ direction: "column", x: "center" }}
       width100
-      padding={{ top: [10, 10, 10, 11] }}
+      padding={{ top: [7, 8, 8, 9] }}
     >
       <div className={styles.embla} ref={emblaRef}>
         <div className={styles.embla__container}>
@@ -86,7 +86,7 @@ export const Carousel: FC<ICarouselProps> = ({ data, cta }) => {
                     quality={30}
                   />
                 </div>
-              )
+              ),
           )}
         </div>
       </div>

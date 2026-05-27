@@ -437,6 +437,8 @@
   }
   @media (min-width: $laptop) {
     min-height: fit-content;
+    height: auto !important;
+    max-height: var(--hero-height-2) !important;
     .content {
       height: auto;
       .subTitle {

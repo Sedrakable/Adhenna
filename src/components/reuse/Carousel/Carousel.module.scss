@@ -10,6 +10,7 @@
     hsl(from var(--burgundy) h s l / 0) 100%
   );
   width: 100%;
+  z-index: 10;
 }
 .embla__container {
   display: flex;
